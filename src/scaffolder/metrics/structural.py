@@ -58,10 +58,12 @@ def get_ground_truth(document: Document) -> GroundTruthStructure:
 
         if lc.cross_references:
             for ref in lc.cross_references:
-                all_cross_refs.append({
-                    "text": str(ref.raw_text),
-                    "target": str(ref.target_identifier),
-                })
+                all_cross_refs.append(
+                    {
+                        "text": str(ref.raw_text),
+                        "target": str(ref.target_identifier),
+                    }
+                )
 
         if lc.hierarchy_path:
             # Count depth from hierarchy path (e.g. "1 > 1.2 > 1.2.1")
@@ -246,8 +248,7 @@ def cross_ref_resolution_rate(chunk_set: ChunkSet, document: Document) -> float:
 
             # Check 3: target is in adjacent chunk (index +/- 1)
             found_adjacent = any(
-                0 <= adj_i < len(chunks_list)
-                and target_lower in chunks_list[adj_i].text.lower()
+                0 <= adj_i < len(chunks_list) and target_lower in chunks_list[adj_i].text.lower()
                 for adj_i in (i - 1, i + 1)
             )
             if found_adjacent:
@@ -257,23 +258,71 @@ def cross_ref_resolution_rate(chunk_set: ChunkSet, document: Document) -> float:
     return resolved / len(valid_refs)
 
 
+# -- Hierarchy & Distribution Metrics ----------------------------------------
+
+
+def hierarchy_depth_retained(chunk_set: ChunkSet, document: Document) -> float:
+    """Calculate what fraction of the document's hierarchy depth is preserved.
+
+    Returns:
+        1.0 = full depth retained (best), 0.0 = flat (worst).
+    """
+    gt = get_ground_truth(document)
+    if gt.max_hierarchy_depth <= 1:
+        return 1.0
+
+    max_chunk_depth = 0
+    section_pattern = re.compile(r"(\d+(?:\.\d+)*)\.")
+
+    for chunk in chunk_set.chunks:
+        for match in section_pattern.finditer(chunk.text):
+            depth = match.group(1).count(".") + 1
+            max_chunk_depth = max(max_chunk_depth, depth)
+
+        hier = chunk.metadata.get("section_hierarchy")
+        if isinstance(hier, str):
+            max_chunk_depth = max(max_chunk_depth, hier.count(">") + 1)
+        elif isinstance(hier, (list, tuple)):
+            max_chunk_depth = max(max_chunk_depth, len(hier))
+
+    return min(max_chunk_depth / gt.max_hierarchy_depth, 1.0)
+
+
+def chunk_size_cv(chunk_set: ChunkSet) -> float:
+    """Calculate the coefficient of variation of chunk sizes.
+
+    CV = std_dev / mean. Lower is more uniform.
+    Returns 0.0 if fewer than 2 chunks.
+    """
+    if len(chunk_set.chunks) < 2:
+        return 0.0
+
+    sizes = [c.char_count for c in chunk_set.chunks]
+    mean = sum(sizes) / len(sizes)
+    if mean == 0:
+        return 0.0
+    variance = sum((s - mean) ** 2 for s in sizes) / len(sizes)
+    std_dev = variance**0.5
+    return std_dev / mean
+
+
 # -- Convenience Function ---------------------------------------------------
 
 
-def compute_structural_metrics(chunk_set: ChunkSet, document: Document) -> StructuralMetrics:
-    """Compute all structural metrics for a ChunkSet against a Document.
-
-    NOTE: hierarchy_depth_retained and chunk_size_cv return placeholder
-    values (0.0) today. Day 5 will implement them.
-    """
+def compute_structural_metrics(
+    chunk_set: ChunkSet, document: Document
+) -> StructuralMetrics:
+    """Compute all structural metrics for a ChunkSet against a Document."""
     return StructuralMetrics(
         strategy=chunk_set.strategy,
         document_id=chunk_set.document_id,
         clause_fragmentation_rate=clause_fragmentation_rate(chunk_set, document),
-        definition_preservation_rate=definition_preservation_rate(chunk_set, document),
+        definition_preservation_rate=definition_preservation_rate(
+            chunk_set, document
+        ),
         cross_ref_resolution_rate=cross_ref_resolution_rate(chunk_set, document),
-        hierarchy_depth_retained=0.0,  # placeholder -- Day 5
-        chunk_size_cv=0.0,  # placeholder -- Day 5
+        hierarchy_depth_retained=hierarchy_depth_retained(chunk_set, document),
+        chunk_size_cv=chunk_size_cv(chunk_set),
         chunk_count=chunk_set.count,
         avg_chunk_chars=chunk_set.avg_chunk_size,
     )

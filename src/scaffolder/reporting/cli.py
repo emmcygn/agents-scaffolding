@@ -110,3 +110,71 @@ def render_summary_header(
         console.print(f"  Embedding models: {', '.join(m.value for m in result.models)}")
     console.rule()
     console.print()
+
+
+def render_aggregate_summary(
+    result: BenchmarkResult,
+    console: Console | None = None,
+) -> None:
+    """Render aggregate summary comparing strategies across all documents."""
+    if console is None:
+        console = Console()
+
+    if not result.structural_metrics:
+        return
+
+    # Compute per-strategy averages
+    from collections import defaultdict
+
+    strategy_sums: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    strategy_counts: dict[str, int] = defaultdict(int)
+
+    for m in result.structural_metrics:
+        key = m.strategy.value
+        strategy_sums[key]["frag"] += m.clause_fragmentation_rate
+        strategy_sums[key]["def"] += m.definition_preservation_rate
+        strategy_sums[key]["xref"] += m.cross_ref_resolution_rate
+        strategy_sums[key]["hier"] += m.hierarchy_depth_retained
+        strategy_counts[key] += 1
+
+    table = Table(
+        title="Aggregate Summary (averaged across all documents)",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Strategy", style="bold")
+    table.add_column("Avg Clause Frag.", justify="right")
+    table.add_column("Avg Def. Preserv.", justify="right")
+    table.add_column("Avg XRef Resol.", justify="right")
+    table.add_column("Avg Hierarchy", justify="right")
+
+    for strategy in sorted(strategy_sums.keys()):
+        n = strategy_counts[strategy]
+        sums = strategy_sums[strategy]
+        table.add_row(
+            strategy,
+            f"{sums['frag'] / n:.3f}",
+            f"{sums['def'] / n:.3f}",
+            f"{sums['xref'] / n:.3f}",
+            f"{sums['hier'] / n:.2f}",
+        )
+
+    console.print(table)
+    console.print()
+
+
+def render_benchmark(
+    result: BenchmarkResult,
+    console: Console | None = None,
+) -> None:
+    """Full CLI benchmark output: header + structural + summary.
+
+    This is the main entry point for CLI rendering. Day 10 adds
+    retrieval metrics rendering between structural and summary.
+    """
+    if console is None:
+        console = Console()
+
+    render_summary_header(result, console)
+    render_structural_table(result.structural_metrics, console)
+    render_aggregate_summary(result, console)

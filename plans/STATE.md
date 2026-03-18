@@ -48,7 +48,7 @@ _(none)_
 | 02  | completed | 2026-03-18 | Config system complete: validation, YAML, env vars, scaffolder.yaml.example, 26 tests |
 | 03  | completed | 2026-03-18 | Query schema, 8 queries (uk_sa + us_msa), queries.py loader |
 | 04  | completed | 2026-03-18 | 22 queries across all 5 fixtures, CLI reporter, test_queries.py |
-| 05  | not_started | | |
+| 05  | completed | 2026-03-18 | JSON export, CLI polish, Streamlit skeleton (3 pages + components) |
 | 06  | not_started | | |
 | 07  | not_started | | Depends on Agent A ChunkingPipeline (Day 3) |
 | 08  | not_started | | |

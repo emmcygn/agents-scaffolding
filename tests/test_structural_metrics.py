@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from scaffolder.metrics.structural import (
     _gt_cache,
+    chunk_size_cv,
     clause_fragmentation_rate,
     compute_structural_metrics,
     cross_ref_resolution_rate,
     definition_preservation_rate,
     get_ground_truth,
+    hierarchy_depth_retained,
 )
 from scaffolder.models import (
     Chunk,
@@ -22,7 +24,7 @@ from scaffolder.models import (
 STRUCTURED_DOC = Document(
     id="test_structural",
     text=(
-        '1. Definitions.\n'
+        "1. Definitions.\n"
         '1.1 "Service Provider" means the party providing services.\n'
         '1.2 "Client" means the party receiving services.\n'
         "2. Obligations.\n"
