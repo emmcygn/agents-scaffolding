@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -98,12 +99,33 @@ def run_structural_benchmark(args: argparse.Namespace) -> None:
         print(f"\nJSON exported to: {json_path}")
 
 
+def _get_available_models() -> list:
+    """Return list of available embedding models.
+
+    Always includes local models. Includes Voyage only if API key is set.
+    """
+    from scaffolder.models import EmbeddingModelName
+
+    models = [EmbeddingModelName.MINILM]
+
+    voyage_key = os.environ.get("VOYAGE_API_KEY")
+    if voyage_key:
+        logger.info("VOYAGE_API_KEY found, including voyage-law-2.")
+        models.append(EmbeddingModelName.VOYAGE_LAW_2)
+    else:
+        logger.info("VOYAGE_API_KEY not set, skipping voyage-law-2.")
+
+    return models
+
+
+logger = logging.getLogger(__name__)
+
+
 def run_retrieval_benchmark(args: argparse.Namespace) -> None:
     """Run full benchmark including embeddings and retrieval."""
     from scaffolder.embedding import EmbeddingPipeline
     from scaffolder.metrics.retrieval import compute_retrieval_metrics
     from scaffolder.metrics.statistical import compute_all_significance
-    from scaffolder.models import EmbeddingModelName
     from scaffolder.retrieval import RetrievalSimulator, build_all_indices
     from scaffolder.retrieval.simulator import load_queries_from_yaml
 
@@ -115,7 +137,7 @@ def run_retrieval_benchmark(args: argparse.Namespace) -> None:
     pipeline = ChunkingPipeline(strategies)
     strategy_results = pipeline.run(documents)
 
-    models = [EmbeddingModelName.MINILM]
+    models = _get_available_models()
     result = BenchmarkResult(
         timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
         strategies=[sr.strategy for sr in strategy_results],

@@ -24,7 +24,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 08  | completed | 2026-03-18 | RetrievalSimulator + query bridge + relevance matching + 10 tests |
 | 09  | completed | 2026-03-18 | P@k, R@k, MRR, NDCG@10, DRM rate + compute_retrieval_metrics + 21 tests |
 | 10  | completed | 2026-03-18 | Statistical significance (paired t-test) + benchmark-embed CLI + 7 tests |
-| 11  | not_started | | Depends on Agent B Voyage adapter (Day 6) |
+| 11  | completed | 2026-03-18 | Voyage toggle (_get_available_models), graceful skip without API key + 2 tests |
 | 12  | not_started | | |
 | 13  | not_started | | |
 | 14  | not_started | | |
