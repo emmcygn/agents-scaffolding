@@ -45,7 +45,7 @@ _(none)_
 | Day | Status | Completed | Notes |
 |-----|--------|-----------|-------|
 | 01  | completed | 2026-03-18 | PAIR day — pyproject.toml, config.py, Makefile, .gitignore, all __init__.py files |
-| 02  | not_started | | |
+| 02  | completed | 2026-03-18 | Config system complete: validation, YAML, env vars, scaffolder.yaml.example, 26 tests |
 | 03  | not_started | | |
 | 04  | not_started | | |
 | 05  | not_started | | |
@@ -77,5 +77,5 @@ Track key files that both agents depend on. When these change, note it here.
 | File | Last Modified By | Day | What Changed |
 |------|-----------------|-----|--------------|
 | `src/scaffolder/models.py` | Agent A | 01 | Created all data contracts, enums, protocols (ChunkingStrategy, Embedder) |
-| `src/scaffolder/config.py` | Agent B | 01 | Created BenchmarkConfig dataclass with from_yaml, from_env, resolve_paths |
+| `src/scaffolder/config.py` | Agent B | 02 | Full config: validation, YAML merging, env vars, load(), to_dict() |
 | `queries/*.yaml` | — | — | — |
