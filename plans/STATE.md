@@ -26,7 +26,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 10  | completed | 2026-03-18 | Statistical significance (paired t-test) + benchmark-embed CLI + 7 tests |
 | 11  | completed | 2026-03-18 | Voyage toggle (_get_available_models), graceful skip without API key + 2 tests |
 | 12  | completed | 2026-03-18 | LexiChunkContextualStrategy + _build_context_header + registry (5 strategies) + 15 tests |
-| 13  | not_started | | |
+| 13  | completed | 2026-03-18 | HTML report skeleton + structural charts + Plotly + Jinja2 template + 13 tests |
 | 14  | not_started | | |
 | 15  | not_started | | |
 | 16  | not_started | | |
