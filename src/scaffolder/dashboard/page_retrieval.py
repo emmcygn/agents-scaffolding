@@ -42,9 +42,7 @@ def render_page() -> None:
 
     if not _check_retrieval_available():
         st.warning(
-            "The retrieval pipeline is not yet available. "
-            "This page requires Agent A's RetrievalSimulator (Day 8). "
-            "Install embedding dependencies with: `pip install -e '.[embeddings]'`"
+            "Retrieval requires embedding dependencies. Install with: `pip install -e '.[local]'`"
         )
         _render_query_browser()
         return
@@ -56,13 +54,18 @@ def render_page() -> None:
         doc_id = st.selectbox("Document", options=FIXTURE_OPTIONS, key="ret_doc")
 
     with col2:
-        st.selectbox("Embedding Model", options=MODEL_OPTIONS, key="ret_model")
+        # Use global model setting from sidebar if available
+        global_model = st.session_state.get("config", {}).get("embedding_model", "all-MiniLM-L6-v2")
+        model_default = MODEL_OPTIONS.index(global_model) if global_model in MODEL_OPTIONS else 0
+        st.selectbox("Embedding Model", options=MODEL_OPTIONS, index=model_default, key="ret_model")
 
     with col3:
         st.slider("Top-k results", min_value=1, max_value=20, value=5, key="ret_k")
 
     # Strategies come from sidebar config (set in app.py)
-    _ = st.session_state.get("config", {}).get("strategies", ["lexichunk", "langchain_rcts"])
+    strategies = st.session_state.get("config", {}).get(
+        "strategies", ["lexichunk", "langchain_rcts"]
+    )
 
     # --- Query Input ---
     st.subheader("Query")
@@ -110,18 +113,119 @@ def render_page() -> None:
     )
 
     if run_button and query.strip():
-        st.info(
-            "Retrieval pipeline integration pending Agent A's RetrievalSimulator. "
-            "The query interface is ready — results will appear once the pipeline is connected."
-        )
+        model = st.session_state.get("ret_model", MODEL_OPTIONS[0])
+        _run_retrieval(doc_id, query, strategies, model)
 
-    # --- Placeholder Results ---
+    # --- Results ---
     st.markdown("---")
     st.subheader("Results")
-    st.info("Results will appear here after retrieval pipeline is integrated.")
+    if "ret_results" not in st.session_state:
+        st.info("Click 'Search' to run retrieval and see results.")
+    elif not run_button:
+        _display_retrieval_results(st.session_state["ret_results"])
 
     # --- Filtered Retrieval Demo ---
     _render_filtered_retrieval(doc_id)
+
+
+def _run_retrieval(
+    doc_id: str,
+    query_text: str,
+    strategies: list[str],
+    model_name: str,
+) -> None:
+    """Run retrieval for a query across selected strategies and display results."""
+    k = st.session_state.get("ret_k", 5)
+
+    with st.spinner("Running retrieval pipeline..."):
+        try:
+            from scaffolder.chunking import get_strategy
+            from scaffolder.embedding.pipeline import EmbeddingPipeline
+            from scaffolder.fixtures import FixtureManager
+            from scaffolder.models import EmbeddingModelName
+            from scaffolder.retrieval.index import VectorIndex
+
+            manager = FixtureManager()
+            document = manager.load(doc_id)
+
+            # Map string model name to enum
+            model_enum = EmbeddingModelName(model_name)
+            embed_pipeline = EmbeddingPipeline()
+
+            results_by_strategy: dict[str, list[dict[str, Any]]] = {}
+
+            for strat_name in strategies:
+                # Get or cache chunk set
+                chunk_key = f"chunks_{doc_id}_{strat_name}"
+                chunk_set = st.session_state.get(chunk_key)
+                if chunk_set is None:
+                    strategy = get_strategy(strat_name)
+                    chunk_set = strategy.chunk(document)
+                    st.session_state[chunk_key] = chunk_set
+
+                chunks = list(chunk_set.chunks)
+                if not chunks:
+                    continue
+
+                # Get or cache index
+                index_key = f"index_{doc_id}_{strat_name}_{model_name}"
+                index = st.session_state.get(index_key)
+                if index is None:
+                    chunk_texts = [c.text for c in chunks]
+                    embeddings = embed_pipeline.embed_texts(chunk_texts, model_enum)
+                    index = VectorIndex(dimension=embeddings.shape[1])
+                    index.add(chunks, embeddings)
+                    st.session_state[index_key] = index
+
+                # Embed query and search
+                query_emb = embed_pipeline.embed_texts([query_text], model_enum)
+                hits = index.search(query_emb[0], k=k)
+
+                results_by_strategy[strat_name] = [
+                    {
+                        "rank": h.rank,
+                        "score": h.score,
+                        "text": h.chunk.text[:500],
+                        "chunk_id": h.chunk.id,
+                        "clause_type": h.chunk.metadata.get("clause_type", ""),
+                    }
+                    for h in hits
+                ]
+
+            st.session_state["ret_results"] = results_by_strategy
+
+        except Exception as e:
+            st.error(f"Retrieval failed: {e}")
+            return
+
+    # Display results
+    _display_retrieval_results(results_by_strategy)
+
+
+def _display_retrieval_results(results_by_strategy: dict[str, list[dict[str, Any]]]) -> None:
+    """Display retrieval results side by side."""
+    if not results_by_strategy:
+        st.warning("No results returned.")
+        return
+
+    strategy_names = list(results_by_strategy.keys())
+    cols = st.columns(len(strategy_names))
+
+    for col, strat_name in zip(cols, strategy_names, strict=True):
+        with col:
+            st.markdown(f"**{strat_name}**")
+            hits = results_by_strategy[strat_name]
+            if not hits:
+                st.caption("No results")
+                continue
+
+            for hit in hits:
+                clause_label = f" ({hit['clause_type']})" if hit["clause_type"] else ""
+                with st.expander(
+                    f"#{hit['rank']} — score: {hit['score']:.3f}{clause_label}",
+                    expanded=hit["rank"] <= 3,
+                ):
+                    st.text(hit["text"])
 
 
 def _render_query_browser() -> None:
