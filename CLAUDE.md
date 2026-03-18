@@ -69,6 +69,7 @@ This repo is built by **two AI agents working in parallel** with self-contained 
 **Full orchestration protocol:** `plans/ORCHESTRATOR.md`
 **Progress tracker:** `plans/STATE.md` (single source of truth for what's done)
 **Inter-agent comms:** `plans/HANDOFF.md` (append-only log of delivered work)
+**Cross-agent issues:** `plans/ISSUES.md` (bugs, blockers, and requests between agents)
 **Shared lessons:** `tasks/lessons.md` (corrections and patterns)
 
 ### Execution Modes
@@ -95,17 +96,19 @@ One Claude Code session acts as orchestrator, spawning Agent A and Agent B as ba
 
 ### How to Execute a Day
 
-1. Read `plans/STATE.md` → find your next `not_started` day
-2. Check dependencies — is the blocking day marked `completed`?
-3. Read the day file (e.g., `plans/agent-a/day-07.md`) — it is fully self-contained
-4. Check **Prerequisites** — verify the files/modules listed actually exist
-5. Work through the **Checklist** sequentially, using **Implementation Details** for specifics
-6. Validate against **Acceptance Criteria** (commands to run, expected results)
-7. Run `make lint && make test` — fix any failures before proceeding
-8. Update `plans/STATE.md` — mark day as `completed` with timestamp
-9. Write `plans/HANDOFF.md` entry if the other agent depends on today's output
-10. Commit: `Agent {A|B} Day {XX}: {title}`
-11. Loop → back to step 1
+1. Read `plans/ISSUES.md` → fix any open issues assigned to you FIRST
+2. Read `plans/STATE.md` → find your next `not_started` day
+3. Check dependencies — is the blocking day marked `completed`?
+4. Read the day file (e.g., `plans/agent-a/day-07.md`) — it is fully self-contained
+5. Check **Prerequisites** — verify the files/modules listed actually exist
+6. Work through the **Checklist** sequentially, using **Implementation Details** for specifics
+7. **Cross-validate:** After implementing, import and smoke-test any modules you depend on from the other agent. If something is broken, file an issue in `plans/ISSUES.md`.
+8. Validate against **Acceptance Criteria** (commands to run, expected results)
+9. Run `make lint && make test` — fix any failures before proceeding. If a failure is in the OTHER agent's code, file an issue in `plans/ISSUES.md` with severity BLOCKER or BUG.
+10. Update `plans/STATE.md` — mark day as `completed` with timestamp
+11. Write `plans/HANDOFF.md` entry if the other agent depends on today's output
+12. Commit: `Agent {A|B} Day {XX}: {title}`
+13. Loop → back to step 1
 
 ### Agent Coordination Rules
 

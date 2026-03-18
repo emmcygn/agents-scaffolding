@@ -26,6 +26,10 @@ Every agent follows this loop continuously until Day 20 is complete:
 
 ```
 ┌─────────────────────────────────────────────┐
+│  0. READ plans/ISSUES.md                    │
+│     → Fix any open issues assigned to you   │
+│     → This comes BEFORE starting new work   │
+│                                             │
 │  1. READ plans/STATE.md                     │
 │     → Find my next not_started day          │
 │     → Check if dependencies are met         │
@@ -50,9 +54,21 @@ Every agent follows this loop continuously until Day 20 is complete:
 │     → Use Implementation Details for specs  │
 │     → Commit after each logical unit        │
 │                                             │
+│  5b. CROSS-VALIDATE                         │
+│     → Import/smoke-test modules you depend  │
+│       on from the other agent               │
+│     → If something is broken, file an issue │
+│       in plans/ISSUES.md with severity      │
+│       (BLOCKER, BUG, WARN, REQUEST)         │
+│     → If you CAN fix it quickly without     │
+│       breaking ownership, fix it AND log    │
+│       it in ISSUES.md so the owner knows    │
+│                                             │
 │  6. VERIFY Acceptance Criteria              │
 │     → Run the exact commands listed         │
-│     → If failing, fix before proceeding     │
+│     → If failing in YOUR code, fix it       │
+│     → If failing in OTHER agent's code,     │
+│       file ISSUES.md with BLOCKER severity  │
 │                                             │
 │  7. POST-DAY PROTOCOL                       │
 │     → Run: make lint && make test           │
@@ -62,7 +78,7 @@ Every agent follows this loop continuously until Day 20 is complete:
 │     → Commit all changes with message:      │
 │       "Agent {A|B} Day XX: {title}"         │
 │                                             │
-│  8. LOOP → back to step 1                   │
+│  8. LOOP → back to step 0                   │
 └─────────────────────────────────────────────┘
 ```
 
@@ -78,11 +94,12 @@ Both agents work on the **same branch** (master). To avoid conflicts:
 4. **Agents own different files** — conflicts should be rare. The only shared files are:
    - `plans/STATE.md` — both write (different sections)
    - `plans/HANDOFF.md` — both write (append-only)
+   - `plans/ISSUES.md` — both write (append-only, numbered sequentially)
    - `tasks/lessons.md` — both write (append-only)
    - `src/scaffolder/models.py` — Day 1 only (pairing), then read-only for Agent B
    - `src/scaffolder/config.py` — Agent B owns, Agent A reads
 
-5. **If a merge conflict occurs on STATE.md or HANDOFF.md:** take both changes (these files are append-only by design)
+5. **If a merge conflict occurs on STATE.md, HANDOFF.md, or ISSUES.md:** take both changes (these files are append-only by design)
 
 ---
 
@@ -138,9 +155,10 @@ If a terminal crashes or context is lost:
 
 1. Start a new Claude Code session
 2. Send the identity prompt: "You are Agent {A|B}..."
-3. The agent reads `plans/STATE.md` → finds the last completed day → resumes from the next one
-4. The agent reads `plans/HANDOFF.md` → catches up on what the other agent has delivered
-5. The agent reads `tasks/lessons.md` → loads any corrections from prior sessions
+3. The agent reads `plans/ISSUES.md` → fixes any open issues assigned to it FIRST
+4. The agent reads `plans/STATE.md` → finds the last completed day → resumes from the next one
+5. The agent reads `plans/HANDOFF.md` → catches up on what the other agent has delivered
+6. The agent reads `tasks/lessons.md` → loads any corrections from prior sessions
 
 STATE.md is the ground truth. If it says Day 7 is completed, trust it. Don't redo work.
 
