@@ -19,7 +19,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 03  | completed | 2026-03-18 | ChunkingPipeline + 4 strategy wrappers + registry + 23 tests |
 | 04  | completed | 2026-03-18 | Structural metrics: fragmentation, definition preservation, cross-ref resolution + 12 tests |
 | 05  | completed | 2026-03-18 | Hierarchy depth + chunk CV metrics, __main__.py CLI, make benchmark e2e |
-| 06  | not_started | | |
+| 06  | completed | 2026-03-18 | EmbeddingPipeline + SentenceTransformerAdapter + disk cache + 12 tests |
 | 07  | not_started | | |
 | 08  | not_started | | Depends on Agent B queries (Day 3-4) |
 | 09  | not_started | | |
