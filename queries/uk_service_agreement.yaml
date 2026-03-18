@@ -1,0 +1,77 @@
+document_id: uk_service_agreement
+queries:
+  - id: uk_sa_q1
+    text: "What are the termination provisions and notice periods?"
+    failure_mode: clause_fragmentation
+    relevant_sections:
+      - section_id: "clause_termination"
+        relevance: 3
+        description: "Main termination clause with notice period requirements"
+      - section_id: "clause_termination_effects"
+        relevance: 2
+        description: "Effects of termination and surviving obligations"
+      - section_id: "clause_termination_for_cause"
+        relevance: 2
+        description: "Termination for material breach provisions"
+    notes: >
+      Tests clause fragmentation. General-purpose chunkers often split the
+      termination clause across multiple chunks, separating the notice period
+      from the grounds for termination. LexiChunk should keep the entire
+      termination clause tree intact.
+
+  - id: uk_sa_q2
+    text: "What happens to Confidential Information after termination?"
+    failure_mode: lost_definitions
+    relevant_sections:
+      - section_id: "clause_confidentiality"
+        relevance: 3
+        description: "Confidentiality obligations and post-termination duties"
+      - section_id: "definition_confidential_information"
+        relevance: 2
+        description: "Definition of Confidential Information"
+      - section_id: "clause_termination_effects"
+        relevance: 2
+        description: "Surviving obligations after termination"
+    notes: >
+      Tests lost definitions. To answer this query, the retriever must surface
+      both the confidentiality clause AND the definition of "Confidential
+      Information." Baseline chunkers lose the definition linkage.
+
+  - id: uk_sa_q3
+    text: "What limitations apply to liability under this agreement?"
+    failure_mode: orphaned_cross_refs
+    relevant_sections:
+      - section_id: "clause_limitation_liability"
+        relevance: 3
+        description: "Limitation of liability clause"
+      - section_id: "clause_indemnification"
+        relevance: 2
+        description: "Indemnification obligations (often cross-referenced)"
+      - section_id: "clause_exclusions"
+        relevance: 1
+        description: "Exclusions from limitation caps"
+    notes: >
+      Tests orphaned cross-references. Limitation of liability clauses
+      typically reference other sections (e.g., "except as set out in clause X").
+      Baseline chunkers drop these references.
+
+  - id: uk_sa_q4
+    text: "What are the obligations of the Service Provider under clause 2?"
+    failure_mode: destroyed_hierarchy
+    relevant_sections:
+      - section_id: "clause_2"
+        relevance: 3
+        description: "Service provider obligations heading"
+      - section_id: "clause_2.1"
+        relevance: 3
+        description: "Primary service delivery obligation"
+      - section_id: "clause_2.2"
+        relevance: 3
+        description: "Quality and compliance obligation"
+      - section_id: "clause_2.3"
+        relevance: 2
+        description: "Reporting obligations"
+    notes: >
+      Tests destroyed hierarchy. The query asks about a parent clause, so all
+      sub-clauses are relevant. Baseline chunkers may separate 2.1, 2.2, and
+      2.3 from the clause 2 heading, losing the hierarchical relationship.

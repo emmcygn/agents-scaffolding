@@ -57,3 +57,13 @@ When an agent completes work that the other agent depends on, log it here. The o
 **Import paths:** `from scaffolder.fixtures import FixtureManager`
 **Usage:** `fm = FixtureManager(); docs = fm.load_all()` returns `list[Document]` (5 docs). Document IDs: `uk_service_agreement`, `uk_terms_conditions`, `us_msa`, `us_terms_of_service`, `eu_gdpr_excerpt`.
 **Breaking changes:** None.
+
+### Agent B → Agent A | Day 03 Complete
+**What's ready:** Query annotation system — 8 queries across 2 documents, YAML schema, and Python loader
+**Files:**
+- `queries/schema.md` — annotation format documentation
+- `queries/uk_service_agreement.yaml` — 4 queries targeting fragmentation, definitions, cross-refs, hierarchy
+- `queries/us_msa.yaml` — 4 queries targeting same failure modes
+- `src/scaffolder/queries.py` — `load_queries()` and `load_queries_for_document()` functions
+**Import paths:** `from scaffolder.queries import load_queries, AnnotatedQuery, RelevantSection`
+**Breaking changes:** None
