@@ -15,7 +15,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | Day | Status | Completed | Notes |
 |-----|--------|-----------|-------|
 | 01  | completed | 2026-03-18 | PAIR day — models.py, protocol interfaces, directory structure, all __init__.py |
-| 02  | not_started | | |
+| 02  | completed | 2026-03-18 | FixtureManager + 5 legal documents + 13 tests |
 | 03  | not_started | | |
 | 04  | not_started | | |
 | 05  | not_started | | |
@@ -46,7 +46,7 @@ _(none)_
 |-----|--------|-----------|-------|
 | 01  | completed | 2026-03-18 | PAIR day — pyproject.toml, config.py, Makefile, .gitignore, all __init__.py files |
 | 02  | completed | 2026-03-18 | Config system complete: validation, YAML, env vars, scaffolder.yaml.example, 26 tests |
-| 03  | not_started | | |
+| 03  | completed | 2026-03-18 | Query schema, 8 queries (uk_sa + us_msa), queries.py loader |
 | 04  | not_started | | |
 | 05  | not_started | | |
 | 06  | not_started | | |
@@ -78,4 +78,4 @@ Track key files that both agents depend on. When these change, note it here.
 |------|-----------------|-----|--------------|
 | `src/scaffolder/models.py` | Agent A | 01 | Created all data contracts, enums, protocols (ChunkingStrategy, Embedder) |
 | `src/scaffolder/config.py` | Agent B | 02 | Full config: validation, YAML merging, env vars, load(), to_dict() |
-| `queries/*.yaml` | — | — | — |
+| `queries/*.yaml` | Agent B | 03 | 8 queries: uk_service_agreement (4), us_msa (4) |

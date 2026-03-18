@@ -50,3 +50,10 @@ When an agent completes work that the other agent depends on, log it here. The o
 - `from scaffolder.models import StructuralMetrics, RetrievalMetrics, SignificanceResult`
 - `from scaffolder.models import AnnotatedQuery, RelevantSection, RetrievalHit, RetrievalResult`
 **Breaking changes:** None (first creation). `BenchmarkResult.config` is `dict[str, object]`.
+
+### Agent A → Agent B | Day 02 Complete
+**What's ready:** FixtureManager and 5 legal document fixtures.
+**Files:** `src/scaffolder/fixtures/__init__.py`, `src/scaffolder/fixtures/documents/*.txt` (5 files), `tests/test_fixtures.py`
+**Import paths:** `from scaffolder.fixtures import FixtureManager`
+**Usage:** `fm = FixtureManager(); docs = fm.load_all()` returns `list[Document]` (5 docs). Document IDs: `uk_service_agreement`, `uk_terms_conditions`, `us_msa`, `us_terms_of_service`, `eu_gdpr_excerpt`.
+**Breaking changes:** None.
