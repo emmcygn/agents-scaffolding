@@ -133,15 +133,16 @@ class TestFixedSizeStrategy:
 
 
 class TestStrategyRegistry:
-    def test_get_all_strategies_returns_four(self) -> None:
+    def test_get_all_strategies_returns_five(self) -> None:
         strategies = get_all_strategies()
-        assert len(strategies) == 4
+        assert len(strategies) == 5
 
     def test_get_all_strategy_names(self) -> None:
         strategies = get_all_strategies()
         names = {s.name for s in strategies}
         assert names == {
             StrategyName.LEXICHUNK,
+            StrategyName.LEXICHUNK_CONTEXTUAL,
             StrategyName.RCTS,
             StrategyName.SENTENCE_SPLIT,
             StrategyName.FIXED_SIZE,
@@ -151,9 +152,9 @@ class TestStrategyRegistry:
         strategy = get_strategy(StrategyName.LEXICHUNK)
         assert strategy.name == StrategyName.LEXICHUNK
 
-    def test_get_unknown_strategy_raises(self) -> None:
-        with pytest.raises(ValueError, match="Unknown strategy"):
-            get_strategy(StrategyName.LEXICHUNK_CONTEXTUAL)
+    def test_get_contextual_strategy_by_name(self) -> None:
+        strategy = get_strategy(StrategyName.LEXICHUNK_CONTEXTUAL)
+        assert strategy.name == StrategyName.LEXICHUNK_CONTEXTUAL
 
 
 class TestChunkingPipeline:
@@ -161,7 +162,7 @@ class TestChunkingPipeline:
         strategies = get_all_strategies()
         pipeline = ChunkingPipeline(strategies)
         results = pipeline.run([TINY_DOC])
-        assert len(results) == 4
+        assert len(results) == 5
 
     def test_each_result_has_correct_strategy(self) -> None:
         strategies = get_all_strategies()
@@ -178,11 +179,12 @@ class TestChunkingPipeline:
         assert result.strategy == StrategyName.RCTS
         assert len(result.chunk_sets) == 1
 
-    def test_run_single_unknown_raises(self) -> None:
+    def test_run_single_contextual(self) -> None:
         strategies = get_all_strategies()
         pipeline = ChunkingPipeline(strategies)
-        with pytest.raises(ValueError, match="not found"):
-            pipeline.run_single(StrategyName.LEXICHUNK_CONTEXTUAL, [TINY_DOC])
+        result = pipeline.run_single(StrategyName.LEXICHUNK_CONTEXTUAL, [TINY_DOC])
+        assert result.strategy == StrategyName.LEXICHUNK_CONTEXTUAL
+        assert len(result.chunk_sets) == 1
 
     def test_empty_strategies_raises(self) -> None:
         with pytest.raises(ValueError, match="At least one"):
@@ -196,7 +198,7 @@ class TestChunkingPipeline:
         pipeline = ChunkingPipeline(strategies)
         results = pipeline.run(docs)
 
-        assert len(results) == 4
+        assert len(results) == 5
         for result in results:
             assert len(result.chunk_sets) == 5
             for cs in result.chunk_sets:

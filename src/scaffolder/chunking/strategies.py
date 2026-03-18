@@ -17,6 +17,36 @@ from scaffolder.models import (
 logger = logging.getLogger(__name__)
 
 
+def _build_context_header(legal_chunk: Any) -> str:
+    """Build context header for contextual retrieval when build_embedded_text unavailable.
+
+    Format:
+    [Section: 2.1 | Type: obligation | Terms: Service Provider, Client]
+    <original chunk text>
+    """
+    parts: list[str] = []
+
+    if hasattr(legal_chunk, "hierarchy_path") and legal_chunk.hierarchy_path:
+        parts.append(f"Section: {legal_chunk.hierarchy_path}")
+
+    clause_type = getattr(legal_chunk, "clause_type", None)
+    if clause_type is not None:
+        ct_str = str(clause_type.value) if hasattr(clause_type, "value") else str(clause_type)
+        parts.append(f"Type: {ct_str}")
+
+    if hasattr(legal_chunk, "defined_terms_used") and legal_chunk.defined_terms_used:
+        terms = ", ".join(sorted(legal_chunk.defined_terms_used)[:5])
+        parts.append(f"Terms: {terms}")
+
+    if hasattr(legal_chunk, "cross_references") and legal_chunk.cross_references:
+        refs = [str(r.raw_text) for r in legal_chunk.cross_references[:3]]
+        parts.append(f"Refs: {', '.join(refs)}")
+
+    if parts:
+        return f"[{' | '.join(parts)}]\n"
+    return ""
+
+
 class LexiChunkStrategy:
     """Wrapper around LexiChunk's LegalChunker.
 
@@ -62,6 +92,68 @@ class LexiChunkStrategy:
                 Chunk(
                     id=f"lexichunk_{document.id}_{i}",
                     text=lc.content,
+                    document_id=document.id,
+                    strategy=self.name,
+                    index=i,
+                    metadata=metadata,
+                )
+            )
+
+        return ChunkSet(
+            strategy=self.name,
+            document_id=document.id,
+            chunks=tuple(chunks),
+            elapsed_seconds=elapsed,
+        )
+
+
+class LexiChunkContextualStrategy:
+    """LexiChunk with contextual retrieval headers.
+
+    Uses context headers prepended to each chunk before embedding. The headers
+    include section hierarchy, clause type, defined terms, and cross-references.
+    This implements Anthropic's contextual retrieval approach for legal documents.
+    """
+
+    name = StrategyName.LEXICHUNK_CONTEXTUAL
+
+    def __init__(self, **kwargs: Any) -> None:
+        from lexichunk import LegalChunker
+
+        self._chunker = LegalChunker(**kwargs)
+
+    def chunk(self, document: Document) -> ChunkSet:
+        start = time.perf_counter()
+        legal_chunks = self._chunker.chunk(document.text, document_id=document.id)
+        elapsed = time.perf_counter() - start
+
+        chunks: list[Chunk] = []
+        for i, lc in enumerate(legal_chunks):
+            # Build contextual embedded text with header
+            embedded_text = _build_context_header(lc) + lc.content
+
+            metadata: dict[str, Any] = {"contextual": True}
+            if lc.clause_type is not None:
+                ct = lc.clause_type
+                metadata["clause_type"] = str(ct.value) if hasattr(ct, "value") else str(ct)
+            if lc.classification_confidence is not None:
+                metadata["confidence"] = lc.classification_confidence
+            if lc.defined_terms_used:
+                metadata["defined_terms"] = list(lc.defined_terms_used)
+            if lc.cross_references:
+                metadata["cross_references"] = [
+                    {"raw_text": str(cr.raw_text), "target": str(cr.target_identifier)}
+                    for cr in lc.cross_references
+                ]
+            if lc.hierarchy_path:
+                metadata["section_hierarchy"] = str(lc.hierarchy_path)
+            # Store original text for structural metrics
+            metadata["original_text"] = lc.content
+
+            chunks.append(
+                Chunk(
+                    id=f"lexichunk_ctx_{document.id}_{i}",
+                    text=embedded_text,
                     document_id=document.id,
                     strategy=self.name,
                     index=i,

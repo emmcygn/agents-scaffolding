@@ -5,15 +5,16 @@ from __future__ import annotations
 from scaffolder.chunking.pipeline import ChunkingPipeline
 from scaffolder.chunking.strategies import (
     FixedSizeStrategy,
+    LexiChunkContextualStrategy,
     LexiChunkStrategy,
     RCTSStrategy,
     SentenceSplitStrategy,
 )
 from scaffolder.models import ChunkingStrategy, StrategyName
 
-# Registry maps StrategyName -> class. LEXICHUNK_CONTEXTUAL is added on Day 12.
 _STRATEGY_REGISTRY: dict[StrategyName, type[ChunkingStrategy]] = {
     StrategyName.LEXICHUNK: LexiChunkStrategy,  # type: ignore[dict-item]
+    StrategyName.LEXICHUNK_CONTEXTUAL: LexiChunkContextualStrategy,  # type: ignore[dict-item]
     StrategyName.RCTS: RCTSStrategy,  # type: ignore[dict-item]
     StrategyName.SENTENCE_SPLIT: SentenceSplitStrategy,  # type: ignore[dict-item]
     StrategyName.FIXED_SIZE: FixedSizeStrategy,  # type: ignore[dict-item]
@@ -36,6 +37,7 @@ def get_all_strategies(**kwargs: object) -> list[ChunkingStrategy]:
 __all__ = [
     "ChunkingPipeline",
     "FixedSizeStrategy",
+    "LexiChunkContextualStrategy",
     "LexiChunkStrategy",
     "RCTSStrategy",
     "SentenceSplitStrategy",
