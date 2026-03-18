@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiChunk Scaffolder — Build Proposal v2 (2 Engineers / 4 Weeks)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface-2: #1a1a26;
+            --border: #2a2a3a;
+            --text: #e0e0e8;
+            --text-muted: #8888a0;
+            --accent: #6c8cff;
+            --accent-dim: #4a6adf;
+            --green: #4ade80;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --purple: #a78bfa;
+            --cyan: #22d3ee;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 720px;
+            margin: 0 auto 1.5rem;
+        }
+        .hero-meta {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-meta .tag {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .hero-meta .tag strong { color: var(--text); }
+
+        /* ── Layout ── */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+        section:last-child { border-bottom: none; }
+        h2 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.02em;
+        }
+        h2 .num { color: var(--accent); font-weight: 400; margin-right: 0.5rem; }
+        .section-desc { color: var(--text-muted); margin-bottom: 2rem; font-size: 1rem; }
+        h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+        h4 { font-size: 1rem; margin-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; }
+        ul { padding-left: 1.2rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.35rem; color: var(--text-muted); font-size: 0.9rem; }
+        li strong { color: var(--text); }
+
+        /* ── Cards ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent-dim); }
+        .card .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+        }
+        .badge-w1 { background: rgba(74,222,128,0.15); color: var(--green); }
+        .badge-w2 { background: rgba(108,140,255,0.15); color: var(--accent); }
+        .badge-w3 { background: rgba(167,139,250,0.15); color: var(--purple); }
+        .badge-w4 { background: rgba(251,191,36,0.15); color: var(--amber); }
+        .badge-cut { background: rgba(248,113,113,0.15); color: var(--red); }
+        .card p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0; }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead { background: var(--surface-2); }
+        th {
+            text-align: left;
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+            color: var(--text-muted);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(108,140,255,0.04); }
+        td strong { color: var(--text); }
+        td code {
+            background: var(--surface-2);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.82rem;
+            color: var(--cyan);
+        }
+
+        /* ── Mermaid ── */
+        .mermaid-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        .mermaid { text-align: center; }
+
+        /* ── Timeline ── */
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            margin: 2rem 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .timeline-block {
+            padding: 1.25rem 1rem;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+        .timeline-block:last-child { border-right: none; }
+        .timeline-block .phase-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.3rem;
+        }
+        .timeline-block .phase-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.15rem;
+        }
+        .timeline-block .phase-time {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .tl-w1 { background: rgba(74,222,128,0.08); }
+        .tl-w1 .phase-label { color: var(--green); }
+        .tl-w2 { background: rgba(108,140,255,0.08); }
+        .tl-w2 .phase-label { color: var(--accent); }
+        .tl-w3 { background: rgba(167,139,250,0.08); }
+        .tl-w3 .phase-label { color: var(--purple); }
+        .tl-w4 { background: rgba(251,191,36,0.08); }
+        .tl-w4 .phase-label { color: var(--amber); }
+
+        /* ── Swim lanes ── */
+        .swim {
+            display: grid;
+            grid-template-columns: 120px 1fr 1fr;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+        .swim-header {
+            background: var(--surface-2);
+            padding: 0.7rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+        .swim-cell {
+            padding: 0.7rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+        .swim-cell:last-child { border-right: none; }
+        .swim-cell ul { margin: 0; padding-left: 1rem; }
+        .swim-cell li { margin-bottom: 0.25rem; font-size: 0.83rem; }
+        .swim > *:nth-last-child(-n+3) { border-bottom: none; }
+
+        /* ── Tradeoff ── */
+        .tradeoff {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .tradeoff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .tradeoff h4 { margin: 0; font-size: 1rem; }
+        .tradeoff .decision {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(74,222,128,0.15);
+            color: var(--green);
+            white-space: nowrap;
+        }
+        .tradeoff .decision.cut {
+            background: rgba(248,113,113,0.15);
+            color: var(--red);
+        }
+        .tradeoff p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0; }
+        .tradeoff .cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+        .tradeoff .cols div { color: var(--text-muted); }
+        .tradeoff .cols strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Metrics ── */
+        .metric-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+        .metric-card .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .metric-card .metric-label {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        /* ── Pre ── */
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-size: 0.84rem;
+            margin: 1rem 0;
+            color: var(--cyan);
+            line-height: 1.5;
+        }
+
+        /* ── Callout ── */
+        .callout {
+            background: rgba(108,140,255,0.06);
+            border: 1px solid rgba(108,140,255,0.2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .callout strong { color: var(--accent); }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+    <h1>LexiChunk Scaffolder v2</h1>
+    <p class="subtitle">
+        2 engineers, 4 weeks. Prove that legal-aware chunking measurably improves RAG retrieval —
+        with numbers, an interactive demo, and publication-grade rigour.
+    </p>
+    <div class="hero-meta">
+        <span class="tag"><strong>Team:</strong>&nbsp; 2 engineers</span>
+        <span class="tag"><strong>Duration:</strong>&nbsp; 4 weeks (~320 eng-hours)</span>
+        <span class="tag"><strong>Outputs:</strong>&nbsp; CLI + JSON + HTML + Streamlit</span>
+        <span class="tag"><strong>Headline:</strong>&nbsp; Retrieval improvement number by end of Week 3</span>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════ 1. PHILOSOPHY ═══════════════ -->
+<section>
+    <h2><span class="num">01</span>Philosophy: What 4 Weeks Must Deliver</h2>
+    <p class="section-desc">With 2 engineers and 4 weeks, every hour must produce demo-visible signal. No gold-plating.</p>
+
+    <div class="callout">
+        <strong>The one sentence that matters:</strong> "LexiChunk improves legal retrieval precision by X% over LangChain's default splitter, with statistical significance, across multiple embedding models."
+        That claim — backed by reproducible numbers and a live demo — is the entire deliverable. Everything else is in service of making that sentence credible and visible.
+    </div>
+
+    <h3>What Changes from the 3-Month Plan</h3>
+
+    <div class="card-grid">
+        <div class="card">
+            <span class="badge badge-w1">Kept</span>
+            <h4>Structural + Retrieval Metrics</h4>
+            <p>Both metric families ship. Structural metrics prove correctness (Week 1–2), retrieval metrics prove effectiveness (Week 2–3). This is the core value proposition.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-w1">Kept</span>
+            <h4>Multi-Strategy Comparison</h4>
+            <p>LexiChunk vs RCTS vs sentence-split vs fixed-size. But we drop multiple fixed-size variants — one fixed-size baseline (512 tokens) is enough.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-w1">Kept</span>
+            <h4>Streamlit Dashboard</h4>
+            <p>Ships in Week 3–4. Upload, compare chunks, run retrieval queries. But 2 pages instead of 4 — we merge upload+compare and retrieval+metrics.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Deferred</span>
+            <h4>LegalBench-RAG</h4>
+            <p>Moved to post-v1 backlog. 6,858 queries require stable infrastructure. The curated 20–25 queries against 5 fixtures give us the headline number. LegalBench-RAG is the "make it unassailable" step.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Deferred</span>
+            <h4>LLM-Judge (DeepEval)</h4>
+            <p>Moved to post-v1. Deterministic retrieval metrics are the primary proof. LLM-judge adds qualitative depth but is non-deterministic, costs money, and takes integration time we don't have.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Simplified</span>
+            <h4>HTML Report</h4>
+            <p>Streamlit IS the visual report. We still generate a standalone HTML, but it's a simpler Jinja2 template — not a separate design project. The Streamlit dashboard is the demo artifact.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ 2. TEAM SPLIT ═══════════════ -->
+<section>
+    <h2><span class="num">02</span>Team Structure</h2>
+    <p class="section-desc">Two engineers, split by backend vs frontend — but pairing heavily in Week 1 and Week 4.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Primary Focus</th>
+                    <th>Owns</th>
+                    <th>Touches</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Eng A — Pipeline &amp; Eval</strong></td>
+                    <td>Data flow, metrics, statistical rigour</td>
+                    <td>Fixture framework, chunking pipeline, embedding pipeline, FAISS indexing, retrieval simulation, all metrics, statistical testing, CLI + JSON output</td>
+                    <td>Data models (shared), query annotations (shared), CI (shared)</td>
+                </tr>
+                <tr>
+                    <td><strong>Eng B — UI &amp; Reports</strong></td>
+                    <td>Visualisation, interactivity, demo-readiness</td>
+                    <td>Streamlit dashboard (all pages), HTML report, chunk visualiser, Plotly charts, Voyage API adapter, deployment, EXTENSIBILITY.md</td>
+                    <td>Data models (shared), query annotations (shared), config system (shared)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout">
+        <strong>Why this split works:</strong> Eng A produces data. Eng B consumes data and makes it visible. The interface contract between them is the <code>BenchmarkResult</code> dataclass — once that's agreed in Week 1 Day 1, they can work in parallel. Eng A doesn't wait for UI. Eng B doesn't wait for metrics. They converge in Week 3 when Streamlit calls the pipeline live.
+    </div>
+</section>
+
+<!-- ═══════════════ 3. WEEK-BY-WEEK ═══════════════ -->
+<section>
+    <h2><span class="num">03</span>Week-by-Week Execution</h2>
+    <p class="section-desc">Each week has a demo checkpoint. If you can't show progress, something's wrong.</p>
+
+    <div class="timeline">
+        <div class="timeline-block tl-w1">
+            <div class="phase-label">Week 1</div>
+            <div class="phase-name">Skeleton + Structural</div>
+            <div class="phase-time">Chunk it, measure it</div>
+        </div>
+        <div class="timeline-block tl-w2">
+            <div class="phase-label">Week 2</div>
+            <div class="phase-name">Embed + Retrieve</div>
+            <div class="phase-time">The real proof</div>
+        </div>
+        <div class="timeline-block tl-w3">
+            <div class="phase-label">Week 3</div>
+            <div class="phase-name">Dashboard + Polish</div>
+            <div class="phase-time">Make it visible</div>
+        </div>
+        <div class="timeline-block tl-w4">
+            <div class="phase-label">Week 4</div>
+            <div class="phase-name">Harden + Ship</div>
+            <div class="phase-time">Make it unbreakable</div>
+        </div>
+    </div>
+
+    <!-- ── WEEK 1 ── -->
+    <h3>Week 1: Skeleton + Structural Proof</h3>
+    <p>Goal: <code>make benchmark</code> produces a CLI table and JSON file showing structural quality metrics for LexiChunk vs 3 baselines on 5 documents.</p>
+
+    <div class="swim">
+        <div class="swim-header">Day</div>
+        <div class="swim-header">Eng A — Pipeline &amp; Eval</div>
+        <div class="swim-header">Eng B — UI &amp; Reports</div>
+
+        <div class="swim-cell"><strong>Day 1</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Pair with Eng B:</strong> Repo init, <code>pyproject.toml</code>, CI (ruff + mypy + pytest)</li>
+                <li><strong>Pair with Eng B:</strong> Data model contracts — <code>Document</code>, <code>Chunk</code>, <code>ChunkSet</code>, <code>BenchmarkResult</code>, <code>StrategyConfig</code></li>
+                <li>Protocol interfaces: <code>ChunkingStrategy</code>, <code>Embedder</code></li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Pair with Eng A:</strong> Repo init + data models</li>
+                <li><code>config.py</code> — central config with model/strategy toggles, paths</li>
+                <li>Stub <code>Makefile</code>: <code>make test</code>, <code>make lint</code>, <code>make benchmark</code></li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 2–3</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><code>FixtureManager</code>: auto-discover .txt files, load with metadata</li>
+                <li><code>ChunkingPipeline</code>: run all strategies against all documents</li>
+                <li>Strategy wrappers: LexiChunk, RCTS (512), sentence-split, fixed-512</li>
+                <li>Timing instrumentation per strategy per document</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Query annotation schema (YAML) + first 10 queries across 3 fixtures</li>
+                <li>CLI reporter using <code>rich</code>: table of strategies × documents × chunk count/avg size/timing</li>
+                <li>JSON export: <code>results/benchmark_&lt;timestamp&gt;.json</code></li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 4–5</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Structural metrics:</strong> clause fragmentation rate, definition preservation rate, cross-ref resolution rate, hierarchy depth, chunk size distribution</li>
+                <li>Tests for all metrics (known input → known output)</li>
+                <li>Wire metrics into CLI + JSON output</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Complete query annotations: 20–25 queries across all 5 fixtures</li>
+                <li>Extend CLI reporter with structural metrics (colour-coded: green = best)</li>
+                <li>Begin Streamlit skeleton: app.py + page stubs</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout">
+        <strong>Week 1 checkpoint:</strong> <code>make benchmark</code> prints a table showing LexiChunk at &lt;5% clause fragmentation vs 30–60% for RCTS. First hard number exists. JSON file with full results. 20+ annotated queries ready for retrieval testing.
+    </div>
+
+    <!-- ── WEEK 2 ── -->
+    <h3>Week 2: Embed + Retrieve</h3>
+    <p>Goal: <code>make benchmark --embed</code> produces retrieval metrics (P@k, MRR, NDCG) proving LexiChunk retrieves better. The headline number exists.</p>
+
+    <div class="swim">
+        <div class="swim-header">Day</div>
+        <div class="swim-header">Eng A — Pipeline &amp; Eval</div>
+        <div class="swim-header">Eng B — UI &amp; Reports</div>
+
+        <div class="swim-cell"><strong>Day 1–2</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><code>EmbeddingPipeline</code>: pluggable model adapters</li>
+                <li>Local adapter: <code>sentence-transformers</code> with <code>all-MiniLM-L6-v2</code> + <code>bge-base-en-v1.5</code></li>
+                <li>Disk cache: <code>hash(model + text) → .npy</code> in <code>.cache/embeddings/</code></li>
+                <li><code>VectorIndex</code>: FAISS flat L2, one index per (strategy, model, document set)</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Voyage API adapter: <code>voyageai</code> SDK, <code>voyage-law-2</code>, toggled via <code>config.enable_voyage</code></li>
+                <li>API key management (env var), rate limiting, error handling</li>
+                <li>Streamlit Page 1: document upload + side-by-side chunk comparison viewer</li>
+                <li>Chunk viewer component: colour by clause type, show hierarchy path, highlight boundaries</li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 3–4</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><code>RetrievalSimulator</code>: embed query, top-k retrieval from each strategy's index</li>
+                <li>Match retrieved chunks against annotated relevant sections</li>
+                <li><strong>Retrieval metrics:</strong> Precision@k, Recall@k (k=1,3,5,10), MRR, NDCG@10</li>
+                <li>DRM rate: multi-document index, check if top-1 is from correct document</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Streamlit Page 2: retrieval testing — enter a query, see retrieved chunks per strategy ranked with scores</li>
+                <li>Highlight annotated "correct" chunks in green</li>
+                <li>Strategy comparison bar chart (Plotly)</li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 5</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Statistical significance:</strong> paired t-tests, LexiChunk vs each baseline</li>
+                <li>Run full eval: 20+ queries × 4 strategies × 2 local models</li>
+                <li>Wire retrieval metrics into CLI + JSON</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Extend CLI reporter: retrieval metrics table with significance markers (* p&lt;0.05)</li>
+                <li>Extend JSON export with retrieval results</li>
+                <li>Model comparison toggle in Streamlit (switch between MiniLM / BGE)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout">
+        <strong>Week 2 checkpoint:</strong> <code>make benchmark --embed --model minilm</code> shows LexiChunk outperforming RCTS by X% on P@5 with p &lt; 0.05. Results hold across 2 embedding models. The headline number is real.
+    </div>
+
+    <!-- ── WEEK 3 ── -->
+    <h3>Week 3: Dashboard + HTML Report + Voyage</h3>
+    <p>Goal: A polished Streamlit dashboard and standalone HTML report. Voyage Law 2 evaluation (the legal-specific embedding comparison). Everything is demo-ready.</p>
+
+    <div class="swim">
+        <div class="swim-header">Day</div>
+        <div class="swim-header">Eng A — Pipeline &amp; Eval</div>
+        <div class="swim-header">Eng B — UI &amp; Reports</div>
+
+        <div class="swim-cell"><strong>Day 1–2</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li>Run Voyage Law 2 evaluation (paid, one run on full query set)</li>
+                <li>Compare legal-specific vs general-purpose embeddings</li>
+                <li>Contextual retrieval test: LexiChunk with vs without <code>build_embedded_text()</code> context headers</li>
+                <li>Document finding: does legal embedding model amplify or diminish LexiChunk's advantage?</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Streamlit polish: loading states, error handling, responsive layout</li>
+                <li>Metrics summary panel in dashboard: headline numbers with comparison cards</li>
+                <li>Embedding model comparison view: heatmap or grouped bar chart (strategy × model × metric)</li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 3–4</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li>HTML report template (Jinja2): structural metrics + retrieval metrics + charts</li>
+                <li>Embed Plotly charts as inline HTML (no server dependency)</li>
+                <li>Methodology section: explain each metric, cite sources</li>
+                <li>Per-document breakdown tables</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Streamlit: filtered retrieval demo — "find all indemnification clauses" using clause type metadata</li>
+                <li>Export from dashboard: download results.json, download report.html</li>
+                <li>Streamlit deployment to Streamlit Community Cloud (or document steps)</li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 5</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li>Final benchmark run: all strategies × all models (including Voyage)</li>
+                <li>Results sanity check: verify numbers, check for anomalies</li>
+                <li>Write <code>docs/metrics.md</code> — metric definitions and methodology</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Screenshots + GIF capture for README</li>
+                <li>HTML report design pass — make it look professional</li>
+                <li>Start <code>EXTENSIBILITY.md</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout">
+        <strong>Week 3 checkpoint:</strong> Live Streamlit dashboard. Standalone HTML report. Voyage Law 2 comparison done. Contextual retrieval improvement quantified. A non-technical person can upload a contract and see the difference in under 60 seconds.
+    </div>
+
+    <!-- ── WEEK 4 ── -->
+    <h3>Week 4: Harden + Ship</h3>
+    <p>Goal: v1.0.0 tagged. README rewritten. Everything tested. EXTENSIBILITY.md complete. Zero rough edges.</p>
+
+    <div class="swim">
+        <div class="swim-header">Day</div>
+        <div class="swim-header">Eng A — Pipeline &amp; Eval</div>
+        <div class="swim-header">Eng B — UI &amp; Reports</div>
+
+        <div class="swim-cell"><strong>Day 1–2</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li>Test coverage push: target 80%, enforce in CI</li>
+                <li>Edge cases: empty documents, single-clause docs, docs with no definitions</li>
+                <li>Performance: ensure full benchmark completes &lt;5 min (no Voyage), &lt;10 min (with Voyage)</li>
+                <li>Benchmark reproducibility: pin seeds, document versions</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li>Complete <code>EXTENSIBILITY.md</code>: adding fixtures, strategies, models, metrics, queries — with examples</li>
+                <li>Streamlit edge cases: bad uploads, huge files, no results</li>
+                <li>Final Streamlit deploy</li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 3–4</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Pair with Eng B:</strong> README rewrite — quickstart, output examples, benchmark results summary, architecture diagram, screenshots</li>
+                <li>Code review sweep: consistent style, no dead code, all TODOs resolved</li>
+                <li><code>pyproject.toml</code> extras: <code>[local]</code>, <code>[voyage]</code>, <code>[dashboard]</code>, <code>[all]</code></li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Pair with Eng A:</strong> README rewrite</li>
+                <li>Dependency audit: pin versions, check licenses</li>
+                <li>Final CI check: lint + type-check + test + benchmark-dry-run all green</li>
+            </ul>
+        </div>
+
+        <div class="swim-cell"><strong>Day 5</strong></div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Pair:</strong> Tag v1.0.0</li>
+                <li>Verify all outputs: CLI, JSON, HTML, Streamlit</li>
+                <li>Backlog grooming: file issues for LegalBench-RAG, LLM-judge, advanced features</li>
+            </ul>
+        </div>
+        <div class="swim-cell">
+            <ul>
+                <li><strong>Pair:</strong> Tag v1.0.0</li>
+                <li>Final deployment verification</li>
+                <li>Write backlog issues for post-v1 work</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout">
+        <strong>Week 4 checkpoint:</strong> v1.0.0 tagged. README with screenshots. 80%+ test coverage. EXTENSIBILITY.md complete. All outputs (CLI, JSON, HTML, Streamlit) working. Post-v1 backlog filed as GitHub issues.
+    </div>
+</section>
+
+<!-- ═══════════════ 4. SYSTEM ARCHITECTURE ═══════════════ -->
+<section>
+    <h2><span class="num">04</span>System Architecture</h2>
+    <p class="section-desc">Simplified from v1 — same core flow, fewer moving parts.</p>
+
+    <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart LR
+    subgraph INPUT["Input"]
+        A1["5 Built-in\nFixtures"]
+        A2["User Upload\n(Streamlit)"]
+    end
+
+    subgraph CHUNK["Chunking (4 strategies)"]
+        B1["LexiChunk\n± context headers"]
+        B2["RCTS\n(LangChain 512)"]
+        B3["Sentence\nSplit"]
+        B4["Fixed\n512 tokens"]
+    end
+
+    subgraph EVAL_S["Structural Eval"]
+        C1["Fragmentation\nRate"]
+        C2["Definition\nPreservation"]
+        C3["Cross-Ref\nResolution"]
+    end
+
+    subgraph EMBED["Embedding"]
+        D1["MiniLM\n(free)"]
+        D2["BGE-base\n(free)"]
+        D3["Voyage Law 2\n(toggled)"]
+    end
+
+    subgraph RETRIEVE["Retrieval"]
+        E1["FAISS\nIndex"]
+        E2["20-25 Curated\nQueries"]
+        E3["Top-k\nRetrieval"]
+    end
+
+    subgraph EVAL_R["Retrieval Eval"]
+        F1["P@k / R@k"]
+        F2["MRR / NDCG"]
+        F3["DRM Rate"]
+        F4["Paired t-test"]
+    end
+
+    subgraph OUTPUT["Output"]
+        G1["CLI\n(rich)"]
+        G2["JSON"]
+        G3["HTML\n(Jinja2)"]
+        G4["Streamlit\nDashboard"]
+    end
+
+    INPUT --> CHUNK
+    CHUNK --> EVAL_S
+    CHUNK --> EMBED
+    EMBED --> RETRIEVE
+    RETRIEVE --> EVAL_R
+    EVAL_S --> OUTPUT
+    EVAL_R --> OUTPUT
+        </pre>
+    </div>
+
+    <h3>What's Different from v1</h3>
+    <ul>
+        <li><strong>4 strategies, not 6</strong> — dropped fixed-256 and fixed-1024. One fixed-size baseline (512) is sufficient for the comparison. Reduces compute and table clutter.</li>
+        <li><strong>No LLM-Judge node</strong> — deferred to post-v1. The pipeline is fully deterministic.</li>
+        <li><strong>No LegalBench-RAG loader</strong> — deferred. 20–25 curated queries with hand-annotated relevance are the primary evaluation set.</li>
+        <li><strong>Contextual retrieval as a variant, not a separate strategy</strong> — LexiChunk runs with and without <code>build_embedded_text()</code>. This tests Anthropic's contextual retrieval finding directly.</li>
+    </ul>
+</section>
+
+<!-- ═══════════════ 5. PIPELINE FLOW ═══════════════ -->
+<section>
+    <h2><span class="num">05</span>Pipeline Flow — Left to Right</h2>
+    <p class="section-desc">Simplified to 8 stages. Each has a clear owner and week.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Stage</th>
+                    <th>Component</th>
+                    <th>Input → Output</th>
+                    <th>Owner</th>
+                    <th>Week</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Ingest</strong></td>
+                    <td><code>FixtureManager</code></td>
+                    <td>.txt files → <code>Document</code> objects with jurisdiction + type metadata</td>
+                    <td>Eng A</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Chunk</strong></td>
+                    <td><code>ChunkingPipeline</code></td>
+                    <td><code>Document</code> → <code>ChunkSet</code> per strategy (chunks + timing)</td>
+                    <td>Eng A</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Structural Eval</strong></td>
+                    <td><code>StructuralMetrics</code></td>
+                    <td><code>ChunkSet</code> → fragmentation rate, definition coverage, cross-ref rate, hierarchy depth</td>
+                    <td>Eng A</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Embed</strong></td>
+                    <td><code>EmbeddingPipeline</code></td>
+                    <td><code>ChunkSet</code> → embedding vectors (cached to disk)</td>
+                    <td>Eng A (local) + Eng B (Voyage)</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Index</strong></td>
+                    <td><code>VectorIndex</code></td>
+                    <td>Embedding vectors → FAISS flat L2 index</td>
+                    <td>Eng A</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>Retrieve</strong></td>
+                    <td><code>RetrievalSimulator</code></td>
+                    <td>Queries + indices → top-k retrieved chunks per strategy</td>
+                    <td>Eng A</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><strong>Retrieval Eval</strong></td>
+                    <td><code>RetrievalMetrics</code></td>
+                    <td>Retrieved vs relevant → P@k, R@k, MRR, NDCG, DRM, t-tests</td>
+                    <td>Eng A</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><strong>Report</strong></td>
+                    <td><code>ReportGenerator</code> + Streamlit</td>
+                    <td>All metrics → CLI tables, JSON file, HTML page, live dashboard</td>
+                    <td>Eng B (+ Eng A for CLI/JSON)</td>
+                    <td><span class="badge badge-w2">W2</span>–<span class="badge badge-w3">W3</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ 6. TECH STACK ═══════════════ -->
+<section>
+    <h2><span class="num">06</span>Tech Stack (Trimmed)</h2>
+    <p class="section-desc">13 dependencies. Nothing speculative.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Purpose</th>
+                    <th>Package</th>
+                    <th>Install Group</th>
+                    <th>Why</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SDK under test</strong></td>
+                    <td><code>lexichunk</code></td>
+                    <td>core</td>
+                    <td>The thing we're proving</td>
+                </tr>
+                <tr>
+                    <td><strong>Baseline chunker</strong></td>
+                    <td><code>langchain-text-splitters</code></td>
+                    <td>core</td>
+                    <td>Industry-standard baseline (RCTS)</td>
+                </tr>
+                <tr>
+                    <td><strong>CLI output</strong></td>
+                    <td><code>rich</code></td>
+                    <td>core</td>
+                    <td>Beautiful tables, progress bars</td>
+                </tr>
+                <tr>
+                    <td><strong>Config + models</strong></td>
+                    <td><code>pyyaml</code></td>
+                    <td>core</td>
+                    <td>Query annotation files</td>
+                </tr>
+                <tr>
+                    <td><strong>Statistics</strong></td>
+                    <td><code>numpy</code> + <code>scipy</code></td>
+                    <td>core</td>
+                    <td>Metrics computation + paired t-tests</td>
+                </tr>
+                <tr>
+                    <td><strong>Embeddings (local)</strong></td>
+                    <td><code>sentence-transformers</code></td>
+                    <td><code>[local]</code></td>
+                    <td>MiniLM + BGE, zero API cost</td>
+                </tr>
+                <tr>
+                    <td><strong>Vector store</strong></td>
+                    <td><code>faiss-cpu</code></td>
+                    <td><code>[local]</code></td>
+                    <td>Deterministic, fast, no server</td>
+                </tr>
+                <tr>
+                    <td><strong>Embeddings (legal)</strong></td>
+                    <td><code>voyageai</code></td>
+                    <td><code>[voyage]</code></td>
+                    <td>Voyage Law 2 — best legal embedding per MLEB</td>
+                </tr>
+                <tr>
+                    <td><strong>Dashboard</strong></td>
+                    <td><code>streamlit</code></td>
+                    <td><code>[dashboard]</code></td>
+                    <td>Interactive research tool</td>
+                </tr>
+                <tr>
+                    <td><strong>Charts</strong></td>
+                    <td><code>plotly</code></td>
+                    <td><code>[dashboard]</code></td>
+                    <td>Interactive comparison charts in Streamlit + HTML</td>
+                </tr>
+                <tr>
+                    <td><strong>HTML reports</strong></td>
+                    <td><code>jinja2</code></td>
+                    <td>core</td>
+                    <td>Standalone HTML report template</td>
+                </tr>
+                <tr>
+                    <td><strong>Lint + types</strong></td>
+                    <td><code>ruff</code> + <code>mypy</code></td>
+                    <td><code>[dev]</code></td>
+                    <td>Matches LexiChunk conventions</td>
+                </tr>
+                <tr>
+                    <td><strong>Tests</strong></td>
+                    <td><code>pytest</code> + <code>pytest-cov</code></td>
+                    <td><code>[dev]</code></td>
+                    <td>Standard</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <pre>
+pip install scaffolder                    # Core: chunking + structural metrics + CLI/JSON
+pip install scaffolder[local]             # + sentence-transformers + faiss (retrieval eval)
+pip install scaffolder[voyage]            # + Voyage Law 2 API
+pip install scaffolder[dashboard]         # + Streamlit + Plotly
+pip install scaffolder[all]               # Everything
+pip install scaffolder[dev]               # + ruff, mypy, pytest
+    </pre>
+</section>
+
+<!-- ═══════════════ 7. REPO STRUCTURE ═══════════════ -->
+<section>
+    <h2><span class="num">07</span>Repo Structure (Trimmed)</h2>
+    <p class="section-desc">Flatter than v1. No deep nesting. Every file earns its place.</p>
+
+    <pre>
+sdk-scaffolder/
+├── pyproject.toml
+├── Makefile                          # benchmark, benchmark-embed, dashboard, report, test, lint
+├── README.md
+├── EXTENSIBILITY.md
+│
+├── src/scaffolder/
+│   ├── __init__.py
+│   ├── config.py                     # BenchmarkConfig dataclass + defaults
+│   ├── models.py                     # Document, Chunk, ChunkSet, BenchmarkResult
+│   │
+│   ├── fixtures/
+│   │   ├── __init__.py               # FixtureManager
+│   │   └── documents/                # 5 .txt files
+│   │
+│   ├── chunking/
+│   │   ├── __init__.py
+│   │   ├── pipeline.py               # ChunkingPipeline
+│   │   └── strategies.py             # LexiChunk, RCTS, sentence, fixed wrappers
+│   │
+│   ├── embedding/
+│   │   ├── __init__.py
+│   │   ├── pipeline.py               # EmbeddingPipeline + cache
+│   │   └── voyage.py                 # Voyage adapter (toggled)
+│   │
+│   ├── retrieval/
+│   │   ├── __init__.py
+│   │   ├── index.py                  # FAISS wrapper
+│   │   └── simulator.py              # Query execution + result collection
+│   │
+│   ├── metrics/
+│   │   ├── __init__.py
+│   │   ├── structural.py             # Fragmentation, definition coverage, etc.
+│   │   ├── retrieval.py              # P@k, R@k, MRR, NDCG, DRM
+│   │   └── statistical.py            # Paired t-tests
+│   │
+│   ├── reporting/
+│   │   ├── __init__.py
+│   │   ├── cli.py                    # Rich terminal output
+│   │   ├── json_export.py
+│   │   ├── html.py                   # Jinja2 standalone report
+│   │   └── templates/
+│   │       └── report.html.j2
+│   │
+│   └── dashboard/
+│       ├── app.py                    # Streamlit entrypoint
+│       ├── page_compare.py           # Upload + side-by-side chunks
+│       ├── page_retrieval.py         # Query + retrieval comparison + metrics
+│       └── components.py             # Chunk viewer, metric cards
+│
+├── queries/
+│   ├── uk_service_agreement.yaml
+│   ├── uk_terms_conditions.yaml
+│   ├── us_msa.yaml
+│   ├── us_terms_of_service.yaml
+│   ├── eu_gdpr_excerpt.yaml
+│   └── schema.md                     # Query annotation format docs
+│
+├── tests/
+│   ├── test_chunking.py
+│   ├── test_metrics.py
+│   ├── test_retrieval.py
+│   └── test_reporting.py
+│
+├── results/                          # gitignored output
+│   └── .gitkeep
+│
+├── docs/
+│   └── metrics.md                    # Metric definitions + methodology
+│
+└── tasks/
+    ├── proposal.html                 # v1 proposal
+    └── proposal-v2.html              # This document
+    </pre>
+
+    <p><strong>Count:</strong> ~25 Python files. No file should exceed 300 lines. If it does, it's doing too much.</p>
+</section>
+
+<!-- ═══════════════ 8. DEPENDENCY GRAPH ═══════════════ -->
+<section>
+    <h2><span class="num">08</span>Dependency Graph + Critical Path</h2>
+    <p class="section-desc">What blocks what. The critical path determines the schedule.</p>
+
+    <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart TD
+    A["Day 1: Data Models\n(Eng A + B pair)"] --> B["FixtureManager\n(Eng A, W1)"]
+    A --> C["Config + Makefile\n(Eng B, W1)"]
+    A --> Q["Query Annotations\n(Eng B, W1)"]
+    B --> D["ChunkingPipeline\n(Eng A, W1)"]
+    D --> E["StructuralMetrics\n(Eng A, W1)"]
+    D --> F["EmbeddingPipeline\n(Eng A, W2)"]
+    E --> G["CLI + JSON\n(Eng B, W1-2)"]
+    F --> H["FAISS Index\n(Eng A, W2)"]
+    F --> V["Voyage Adapter\n(Eng B, W2)"]
+    H --> I["RetrievalSimulator\n(Eng A, W2)"]
+    Q --> I
+    I --> J["RetrievalMetrics\n(Eng A, W2)"]
+    J --> G
+    J --> K["HTML Report\n(Eng A, W3)"]
+
+    D --> L["Streamlit Compare\n(Eng B, W2-3)"]
+    J --> M["Streamlit Retrieval\n(Eng B, W2-3)"]
+
+    K --> N["README + Polish\n(Eng A+B, W4)"]
+    L --> N
+    M --> N
+    N --> O["v1.0.0\n(W4 Day 5)"]
+
+    style A fill:#2a2a1a,stroke:#fbbf24
+    style B fill:#1a3a1a,stroke:#4ade80
+    style D fill:#1a3a1a,stroke:#4ade80
+    style E fill:#1a3a1a,stroke:#4ade80
+    style F fill:#1a1a3a,stroke:#6c8cff
+    style H fill:#1a1a3a,stroke:#6c8cff
+    style I fill:#1a1a3a,stroke:#6c8cff
+    style J fill:#1a1a3a,stroke:#6c8cff
+    style L fill:#2a1a3a,stroke:#a78bfa
+    style M fill:#2a1a3a,stroke:#a78bfa
+    style K fill:#2a1a3a,stroke:#a78bfa
+    style N fill:#3a2a1a,stroke:#fbbf24
+    style O fill:#3a2a1a,stroke:#fbbf24
+        </pre>
+    </div>
+
+    <div class="callout">
+        <strong>Critical path:</strong> Data Models → FixtureManager → ChunkingPipeline → EmbeddingPipeline → FAISS Index → RetrievalSimulator → RetrievalMetrics → Reports → v1.0.0.
+        This runs entirely through <strong>Eng A</strong>. Eng B's work (Streamlit, Voyage, queries, EXTENSIBILITY.md) runs in parallel after the Day 1 pairing. The biggest risk is Eng A being blocked — if the chunking pipeline slips, everything downstream slips.
+    </div>
+</section>
+
+<!-- ═══════════════ 9. TRADEOFFS ═══════════════ -->
+<section>
+    <h2><span class="num">09</span>Tradeoffs for the 4-Week Scope</h2>
+    <p class="section-desc">What we cut, what we kept, and why.</p>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>4 chunking strategies instead of 6</h4>
+            <span class="decision">Scoped down</span>
+        </div>
+        <p>Dropped fixed-256 and fixed-1024. One fixed-size baseline (512) plus RCTS plus sentence-split gives 3 baselines. Adding more doesn't change the narrative — it just makes tables wider. Post-v1 can add more if needed.</p>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>LegalBench-RAG deferred</h4>
+            <span class="decision cut">Deferred to post-v1</span>
+        </div>
+        <div class="cols">
+            <div>
+                <strong>What we lose</strong>
+                Publication-grade scale (6,858 queries). Comparability with published baselines. The "unassailable" layer of evidence.
+            </div>
+            <div>
+                <strong>Why it's okay</strong>
+                20–25 curated queries with hand-annotated relevance are higher signal per query. We control exactly which failure modes we test. The headline number ("X% improvement") comes from curated queries. LegalBench-RAG is the "make the blog post publishable" step — it can happen in Week 5–6.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>LLM-Judge deferred</h4>
+            <span class="decision cut">Deferred to post-v1</span>
+        </div>
+        <div class="cols">
+            <div>
+                <strong>What we lose</strong>
+                Faithfulness + answer relevancy scores. The qualitative "does the LLM give a better answer with these chunks?" dimension.
+            </div>
+            <div>
+                <strong>Why it's okay</strong>
+                Deterministic retrieval metrics (P@k, MRR, NDCG) are the primary claim. LLM-judge is supplementary. It's also non-deterministic (run-to-run variance), costs money, and adds DeepEval as a dependency. Better to add it to a stable pipeline than rush it into v1.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>2 Streamlit pages instead of 4</h4>
+            <span class="decision">Scoped down</span>
+        </div>
+        <div class="cols">
+            <div>
+                <strong>What we build</strong>
+                Page 1: Upload + side-by-side chunk comparison (merged from upload + compare).
+                Page 2: Retrieval query + results + metrics (merged from retrieval + metrics).
+                Two pages that do everything, instead of four pages that each do one thing.
+            </div>
+            <div>
+                <strong>Why it's better</strong>
+                Fewer navigation steps for demos. "Upload a contract, see chunks, ask a question, see the answer" is a 2-page flow. Metric drilldowns live on the retrieval page as expandable sections. Less code to maintain, test, and keep working.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>Eng A as critical path bottleneck</h4>
+            <span class="decision">Accepted risk</span>
+        </div>
+        <div class="cols">
+            <div>
+                <strong>The risk</strong>
+                If Eng A's chunking pipeline or embedding pipeline slips, Eng B has nothing to visualise. Eng B can build Streamlit against mock data, but integration will be rushed.
+            </div>
+            <div>
+                <strong>Mitigation</strong>
+                Day 1 pairing on data models means Eng B can build against the interface contract, not the implementation. Eng A ships ChunkingPipeline by end of W1 Day 3 — if that slips by more than a day, escalate. Eng B can always work on query annotations, EXTENSIBILITY.md, and Streamlit layout in parallel.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>HTML report is simple, not designed</h4>
+            <span class="decision">Scoped down</span>
+        </div>
+        <p>The Streamlit dashboard is the primary visual artifact. The HTML report is a Jinja2 template with embedded Plotly charts — functional, not beautiful. It exists for sharing results without running Streamlit (email an HTML file, open in browser). If we have time in Week 4, Eng B polishes it. If not, it ships functional.</p>
+    </div>
+</section>
+
+<!-- ═══════════════ 10. METRICS ═══════════════ -->
+<section>
+    <h2><span class="num">10</span>Metrics We Ship</h2>
+    <p class="section-desc">10 metrics. All deterministic. All grounded against published research.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Metric</th>
+                    <th>Type</th>
+                    <th>Week</th>
+                    <th>Grounded Against</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Clause Fragmentation Rate</strong></td>
+                    <td>Structural</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                    <td>Reuter et al. (NLLP 2025): 0.59 vs 0.244 nDCG for structural vs fixed-size</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Definition Preservation Rate</strong></td>
+                    <td>Structural</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                    <td>Anthropic Contextual Retrieval: 35% failure reduction with context</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Cross-Ref Resolution Rate</strong></td>
+                    <td>Structural</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                    <td>Novel — no existing tool measures this</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Hierarchy Depth Retained</strong></td>
+                    <td>Structural</td>
+                    <td><span class="badge badge-w1">W1</span></td>
+                    <td>Ferraris et al. multi-layered retrieval</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Precision@k</strong> (k=1,3,5,10)</td>
+                    <td>Retrieval</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                    <td>RAGAS Context Precision; MLEB standard</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>Recall@k</strong> (k=1,3,5,10)</td>
+                    <td>Retrieval</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                    <td>RAGAS Context Recall; critical for legal completeness</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><strong>MRR</strong></td>
+                    <td>Retrieval</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                    <td>Standard IR; used in LegalBench-RAG</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><strong>NDCG@10</strong></td>
+                    <td>Retrieval</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                    <td>Primary metric in MLEB</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td><strong>DRM Rate</strong></td>
+                    <td>Retrieval</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                    <td>Reuter et al.: &gt;95% with naive chunking</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><strong>Statistical Significance</strong></td>
+                    <td>Meta</td>
+                    <td><span class="badge badge-w2">W2</span></td>
+                    <td>Paired t-test, standard for IR evaluation</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ 11. POST-V1 BACKLOG ═══════════════ -->
+<section>
+    <h2><span class="num">11</span>Post-v1 Backlog</h2>
+    <p class="section-desc">What v1.0.0 doesn't include — filed as GitHub issues on Day 5 of Week 4.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>LegalBench-RAG Integration</h4>
+            <p>Dataset loader, character-level annotation mapping, Token-IoU computation, 6,858-query full benchmark run. Est: 1 week for 1 engineer.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>LLM-Judge (DeepEval)</h4>
+            <p>Faithfulness + answer relevancy via GPT-4o-mini. Toggled, runs on 100-query subset. Cost: ~$10–15 per run. Est: 3–4 days.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>Additional Chunking Strategies</h4>
+            <p>Chonkie, Docling HierarchicalChunker, Unstructured by_title, semantic chunking (embedding-based breakpoints). Each is ~half a day to add.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>Summary-Augmented Chunking Comparison</h4>
+            <p>Implement SAC (prepend 150-char summary per Reuter et al.) as a strategy variant. Compare against LexiChunk's context headers.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>Additional Embedding Models</h4>
+            <p>Kanon 2 Embedder (#1 on MLEB), Voyage 3 Large (#2), nomic-embed-text (long context). Each adapter is ~half a day.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>HuggingFace Space (Gradio)</h4>
+            <p>Lightweight Gradio demo for HuggingFace Spaces discoverability, alongside the full Streamlit dashboard.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>MkDocs Documentation Site</h4>
+            <p>Hosted docs with API reference, user guide, benchmark methodology. The README + metrics.md + EXTENSIBILITY.md cover v1.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-cut">Post-v1</span>
+            <h4>CI Nightly Benchmarks</h4>
+            <p>Automated benchmark runs with regression detection. GitHub Actions scheduled workflow.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ 12. SUCCESS CRITERIA ═══════════════ -->
+<section>
+    <h2><span class="num">12</span>Success Criteria</h2>
+    <p class="section-desc">What v1.0.0 must demonstrate.</p>
+
+    <div class="metric-row">
+        <div class="metric-card">
+            <div class="metric-value">&lt;5%</div>
+            <div class="metric-label">Clause Fragmentation<br>(baselines: 30–60%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">&gt;90%</div>
+            <div class="metric-label">Definition Preservation<br>(baselines: 0%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">+20%</div>
+            <div class="metric-label">Retrieval P@5 vs RCTS<br>(stat. significant)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">0%</div>
+            <div class="metric-label">DRM Rate<br>(baselines: &gt;50%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">60s</div>
+            <div class="metric-label">Time to demo<br>(upload → insight)</div>
+        </div>
+    </div>
+
+    <h3>Definition of Done for v1.0.0</h3>
+    <ul>
+        <li><strong><code>make benchmark</code></strong> — structural metrics for 4 strategies × 5 documents, CLI + JSON output</li>
+        <li><strong><code>make benchmark-embed</code></strong> — adds retrieval metrics across 2 local models (+ Voyage if toggled)</li>
+        <li><strong><code>make report</code></strong> — standalone HTML report with tables and charts</li>
+        <li><strong><code>make dashboard</code></strong> — Streamlit app with upload/compare + retrieval/metrics pages</li>
+        <li><strong>80%+ test coverage</strong> enforced in CI</li>
+        <li><strong>README</strong> with quickstart, screenshots, benchmark results summary</li>
+        <li><strong>EXTENSIBILITY.md</strong> documenting how to add fixtures, strategies, models, metrics</li>
+        <li><strong>docs/metrics.md</strong> defining each metric with citations</li>
+        <li><strong>20–25 curated queries</strong> with hand-annotated relevance across 5 fixtures</li>
+        <li><strong>Statistical significance</strong> (p &lt; 0.05) for primary retrieval claims</li>
+    </ul>
+</section>
+
+</div>
+
+<div class="footer">
+    LexiChunk Scaffolder Proposal v2 &middot; 2 Engineers / 4 Weeks &middot; Generated 2026-03-18
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#1a1a3a',
+            primaryTextColor: '#e0e0e8',
+            primaryBorderColor: '#6c8cff',
+            lineColor: '#4a4a6a',
+            secondaryColor: '#2a1a3a',
+            tertiaryColor: '#1a3a1a',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '13px',
+        },
+        flowchart: { curve: 'basis', padding: 20 },
+    });
+</script>
+
+</body>
+</html>

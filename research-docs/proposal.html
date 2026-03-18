@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiChunk Scaffolder — Build Proposal</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface-2: #1a1a26;
+            --border: #2a2a3a;
+            --text: #e0e0e8;
+            --text-muted: #8888a0;
+            --accent: #6c8cff;
+            --accent-dim: #4a6adf;
+            --green: #4ade80;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --purple: #a78bfa;
+            --cyan: #22d3ee;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            padding: 0;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-meta .tag {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .hero-meta .tag strong { color: var(--text); }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 3.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        section:last-child { border-bottom: none; }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.02em;
+        }
+        h2 .num {
+            color: var(--accent);
+            font-weight: 400;
+            margin-right: 0.5rem;
+        }
+        .section-desc {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 2rem 0 0.75rem;
+            color: var(--text);
+        }
+
+        p { margin-bottom: 1rem; }
+
+        /* ── Cards ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent-dim); }
+        .card .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+        }
+        .badge-p1a { background: rgba(74,222,128,0.15); color: var(--green); }
+        .badge-p1b { background: rgba(108,140,255,0.15); color: var(--accent); }
+        .badge-p2  { background: rgba(167,139,250,0.15); color: var(--purple); }
+        .badge-p3  { background: rgba(251,191,36,0.15); color: var(--amber); }
+
+        .card h4 {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        thead {
+            background: var(--surface-2);
+        }
+        th {
+            text-align: left;
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+            color: var(--text-muted);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(108,140,255,0.04); }
+        td strong { color: var(--text); }
+        td code {
+            background: var(--surface-2);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.82rem;
+            color: var(--cyan);
+        }
+
+        /* ── Mermaid ── */
+        .mermaid-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        .mermaid { text-align: center; }
+
+        /* ── Phase timeline ── */
+        .timeline {
+            display: flex;
+            gap: 0;
+            margin: 2rem 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .timeline-block {
+            flex: 1;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+        }
+        .timeline-block::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background: var(--border);
+        }
+        .timeline-block:last-child::after { display: none; }
+        .timeline-block .phase-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.3rem;
+        }
+        .timeline-block .phase-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+        }
+        .timeline-block .phase-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .tl-1a { background: rgba(74,222,128,0.08); }
+        .tl-1a .phase-label { color: var(--green); }
+        .tl-1b { background: rgba(108,140,255,0.08); }
+        .tl-1b .phase-label { color: var(--accent); }
+        .tl-2  { background: rgba(167,139,250,0.08); }
+        .tl-2 .phase-label  { color: var(--purple); }
+        .tl-3  { background: rgba(251,191,36,0.08); }
+        .tl-3 .phase-label  { color: var(--amber); }
+
+        /* ── Tradeoff cards ── */
+        .tradeoff {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .tradeoff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .tradeoff h4 { margin: 0; font-size: 1rem; }
+        .tradeoff .decision {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(74,222,128,0.15);
+            color: var(--green);
+        }
+        .tradeoff p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+        .tradeoff .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+        .tradeoff .pros-cons div { color: var(--text-muted); }
+        .tradeoff .pros-cons strong { display: block; margin-bottom: 0.3rem; color: var(--text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* ── Lists ── */
+        ul {
+            padding-left: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        li {
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        li strong { color: var(--text); }
+
+        /* ── Metric highlight ── */
+        .metric-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+        .metric-card .metric-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .metric-card .metric-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Code blocks ── */
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            color: var(--cyan);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+    <h1>LexiChunk Scaffolder</h1>
+    <p class="subtitle">
+        Evaluation harness &amp; interactive research tool proving that legal-aware chunking
+        measurably improves RAG retrieval quality over general-purpose alternatives.
+    </p>
+    <div class="hero-meta">
+        <span class="tag"><strong>Target:</strong>&nbsp; SDK effectiveness proof</span>
+        <span class="tag"><strong>Audience:</strong>&nbsp; 80% external demos / 20% self-validation</span>
+        <span class="tag"><strong>Outputs:</strong>&nbsp; CLI + JSON + HTML + Streamlit dashboard</span>
+        <span class="tag"><strong>Repo:</strong>&nbsp; sdk-scaffolder (standalone)</span>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════ 1. PHASE OVERVIEW ═══════════════ -->
+<section>
+    <h2><span class="num">01</span>Phase Overview</h2>
+    <p class="section-desc">Four phases, front-loaded toward measurable proof. Each phase produces a standalone deliverable.</p>
+
+    <div class="timeline">
+        <div class="timeline-block tl-1a">
+            <div class="phase-label">Phase 1a</div>
+            <div class="phase-name">Benchmark Harness</div>
+            <div class="phase-time">Foundation</div>
+        </div>
+        <div class="timeline-block tl-1b">
+            <div class="phase-label">Phase 1b</div>
+            <div class="phase-name">Retrieval Engine</div>
+            <div class="phase-time">Embedding + Eval</div>
+        </div>
+        <div class="timeline-block tl-2">
+            <div class="phase-label">Phase 2</div>
+            <div class="phase-name">Streamlit Dashboard</div>
+            <div class="phase-time">Interactive UI</div>
+        </div>
+        <div class="timeline-block tl-3">
+            <div class="phase-label">Phase 3</div>
+            <div class="phase-name">LLM-Judge + LegalBench</div>
+            <div class="phase-time">Gold-standard eval</div>
+        </div>
+    </div>
+
+    <div class="card-grid">
+        <div class="card">
+            <span class="badge badge-p1a">Phase 1a</span>
+            <h4>Benchmark Harness</h4>
+            <p>Document fixture framework, multi-strategy chunking pipeline (LexiChunk vs 4 baselines), structural quality metrics (clause fragmentation rate, definition coverage, cross-ref resolution), CLI output + JSON export.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-p1b">Phase 1b</span>
+            <h4>Retrieval Evaluation Engine</h4>
+            <p>Embedding pipeline with pluggable models (local free + paid API toggle), FAISS indexing, retrieval simulation with curated legal queries, RAGAS-aligned metrics (P@k, R@k, MRR, NDCG), statistical significance testing, HTML report generation.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-p2">Phase 2</span>
+            <h4>Streamlit Research Dashboard</h4>
+            <p>Upload/paste legal documents, side-by-side chunk visualisation with highlighted boundaries, live retrieval comparison, metrics drilldown, embedding model comparison. Deployable to Streamlit Community Cloud.</p>
+        </div>
+        <div class="card">
+            <span class="badge badge-p3">Phase 3</span>
+            <h4>LLM-Judge + LegalBench-RAG</h4>
+            <p>Formal benchmarking against LegalBench-RAG (6,858 queries). DeepEval/RAGAS faithfulness + answer relevancy scoring via GPT-4o-mini. Voyage Law 2 / Kanon 2 legal embedding comparison. Publication-grade results.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ 2. SYSTEM ARCHITECTURE ═══════════════ -->
+<section>
+    <h2><span class="num">02</span>System Architecture</h2>
+    <p class="section-desc">End-to-end data flow from document ingestion through to evaluation output.</p>
+
+    <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart LR
+    subgraph INPUT["Document Input"]
+        A1[5 Built-in Fixtures]
+        A2[User Upload]
+        A3[LegalBench-RAG Dataset]
+    end
+
+    subgraph CHUNK["Multi-Strategy Chunking"]
+        B1["LexiChunk\n(clause-aware)"]
+        B2["RecursiveCharacter\nTextSplitter"]
+        B3["Sentence\nSplitting"]
+        B4["Fixed-Size\n256 / 512 / 1024"]
+    end
+
+    subgraph METRICS_S["Structural Metrics"]
+        C1[Clause Fragmentation Rate]
+        C2[Definition Preservation]
+        C3[Cross-Ref Resolution]
+        C4[Hierarchy Depth Retained]
+    end
+
+    subgraph EMBED["Embedding Layer"]
+        D1["all-MiniLM-L6-v2\n(free, local)"]
+        D2["bge-base-en-v1.5\n(free, local)"]
+        D3["voyage-law-2\n(paid, toggled)"]
+    end
+
+    subgraph RETRIEVE["Retrieval Simulation"]
+        E1[FAISS Index]
+        E2[Curated Legal Queries]
+        E3[Top-k Retrieval]
+    end
+
+    subgraph EVAL["Evaluation"]
+        F1["Precision@k / Recall@k"]
+        F2["MRR / NDCG@10"]
+        F3["Paired t-tests"]
+        F4["LLM-Judge\n(Phase 3, toggled)"]
+    end
+
+    subgraph OUTPUT["Output Layer"]
+        G1[CLI Report]
+        G2[JSON Export]
+        G3[HTML Report]
+        G4[Streamlit Dashboard]
+    end
+
+    INPUT --> CHUNK
+    CHUNK --> METRICS_S
+    CHUNK --> EMBED
+    EMBED --> RETRIEVE
+    RETRIEVE --> EVAL
+    EVAL --> OUTPUT
+    METRICS_S --> OUTPUT
+        </pre>
+    </div>
+
+    <h3>Component Interaction Detail</h3>
+    <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart TB
+    subgraph core["Core Layer (Phase 1a)"]
+        FM[FixtureManager] --> |"loads docs"| CP[ChunkingPipeline]
+        CP --> |"LexiChunk"| CS1[ChunkSet]
+        CP --> |"RCTS"| CS2[ChunkSet]
+        CP --> |"Sentence"| CS3[ChunkSet]
+        CP --> |"Fixed"| CS4[ChunkSet]
+        CS1 & CS2 & CS3 & CS4 --> SM[StructuralMetrics]
+    end
+
+    subgraph retrieval["Retrieval Layer (Phase 1b)"]
+        CS1 & CS2 & CS3 & CS4 --> EP[EmbeddingPipeline]
+        EP --> |"pluggable model"| VI[VectorIndex]
+        QS[QuerySet] --> RS[RetrievalSimulator]
+        VI --> RS
+        RS --> RM[RetrievalMetrics]
+    end
+
+    subgraph output["Output Layer"]
+        SM & RM --> RG[ReportGenerator]
+        RG --> CLI[CLI stdout]
+        RG --> JSON[results.json]
+        RG --> HTML[report.html]
+    end
+
+    subgraph ui["UI Layer (Phase 2)"]
+        SM & RM & CP --> ST[Streamlit App]
+    end
+        </pre>
+    </div>
+</section>
+
+<!-- ═══════════════ 3. PIPELINE FLOW TABLE ═══════════════ -->
+<section>
+    <h2><span class="num">03</span>Pipeline Flow — Left to Right</h2>
+    <p class="section-desc">Each stage of the evaluation pipeline, what it does, its inputs/outputs, and which phase delivers it.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th>Component</th>
+                    <th>Input</th>
+                    <th>Process</th>
+                    <th>Output</th>
+                    <th>Phase</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. Ingest</strong></td>
+                    <td><code>FixtureManager</code></td>
+                    <td>5 built-in .txt files, user uploads, or LegalBench-RAG corpus</td>
+                    <td>Load, validate, detect jurisdiction, assign document ID. Extensible registry for adding new fixtures.</td>
+                    <td><code>Document</code> objects with metadata</td>
+                    <td><span class="badge badge-p1a">1a</span></td>
+                </tr>
+                <tr>
+                    <td><strong>2. Chunk</strong></td>
+                    <td><code>ChunkingPipeline</code></td>
+                    <td><code>Document</code> objects</td>
+                    <td>Run each document through all registered strategies in parallel. Strategies: LexiChunk (clause-aware), RCTS (LangChain default), sentence-split, fixed-size (256/512/1024 tokens).</td>
+                    <td><code>ChunkSet</code> per strategy per document (chunks + timing + metadata)</td>
+                    <td><span class="badge badge-p1a">1a</span></td>
+                </tr>
+                <tr>
+                    <td><strong>3. Structural Eval</strong></td>
+                    <td><code>StructuralMetrics</code></td>
+                    <td><code>ChunkSet</code> objects</td>
+                    <td>Compute clause fragmentation rate (% chunks splitting mid-clause), definition preservation (% defined terms accessible), cross-ref resolution rate, avg hierarchy depth, chunk size distribution.</td>
+                    <td><code>StructuralReport</code> per strategy</td>
+                    <td><span class="badge badge-p1a">1a</span></td>
+                </tr>
+                <tr>
+                    <td><strong>4. Embed</strong></td>
+                    <td><code>EmbeddingPipeline</code></td>
+                    <td><code>ChunkSet</code> objects</td>
+                    <td>Embed all chunks using selected model(s). Local models via <code>sentence-transformers</code>. Paid models (Voyage) via API with toggle. Caches embeddings to disk for re-runs.</td>
+                    <td>Embedding vectors per chunk, persisted in <code>.cache/</code></td>
+                    <td><span class="badge badge-p1b">1b</span></td>
+                </tr>
+                <tr>
+                    <td><strong>5. Index</strong></td>
+                    <td><code>VectorIndex</code></td>
+                    <td>Embedding vectors</td>
+                    <td>Build FAISS flat L2 index per strategy per embedding model. Supports incremental updates.</td>
+                    <td>FAISS indices ready for querying</td>
+                    <td><span class="badge badge-p1b">1b</span></td>
+                </tr>
+                <tr>
+                    <td><strong>6. Query</strong></td>
+                    <td><code>RetrievalSimulator</code></td>
+                    <td>Curated query set + FAISS indices</td>
+                    <td>For each query: embed query, retrieve top-k from each strategy's index, record retrieved chunks and ranks. Queries have known-relevant chunk annotations.</td>
+                    <td><code>RetrievalResult</code> per query per strategy</td>
+                    <td><span class="badge badge-p1b">1b</span></td>
+                </tr>
+                <tr>
+                    <td><strong>7. Retrieval Eval</strong></td>
+                    <td><code>RetrievalMetrics</code></td>
+                    <td><code>RetrievalResult</code> objects</td>
+                    <td>Compute Precision@k, Recall@k, MRR, NDCG@10 per strategy. Run paired t-tests for statistical significance between LexiChunk and each baseline.</td>
+                    <td><code>RetrievalReport</code> with per-query and aggregate scores</td>
+                    <td><span class="badge badge-p1b">1b</span></td>
+                </tr>
+                <tr>
+                    <td><strong>8. LLM Judge</strong></td>
+                    <td><code>LLMEvaluator</code></td>
+                    <td>Retrieved contexts + queries</td>
+                    <td>Feed top-k context + query to GPT-4o-mini via DeepEval. Score faithfulness (target &gt;0.9) and answer relevancy. Toggled off by default; runs on configurable subset.</td>
+                    <td><code>FaithfulnessReport</code></td>
+                    <td><span class="badge badge-p3">3</span></td>
+                </tr>
+                <tr>
+                    <td><strong>9. Report</strong></td>
+                    <td><code>ReportGenerator</code></td>
+                    <td>All metric reports</td>
+                    <td>Aggregate results into three formats: CLI summary (rich tables), JSON (machine-readable), HTML (standalone page with charts). Comparison tables, per-document breakdowns, statistical significance markers.</td>
+                    <td>CLI stdout, <code>results.json</code>, <code>report.html</code></td>
+                    <td><span class="badge badge-p1b">1b</span></td>
+                </tr>
+                <tr>
+                    <td><strong>10. Dashboard</strong></td>
+                    <td><code>Streamlit App</code></td>
+                    <td>All pipeline components</td>
+                    <td>Interactive multi-page app: upload docs, compare chunking side-by-side, run retrieval queries live, drill into metrics, switch embedding models.</td>
+                    <td>Web UI at <code>localhost:8501</code></td>
+                    <td><span class="badge badge-p2">2</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ 4. TECH STACK ═══════════════ -->
+<section>
+    <h2><span class="num">04</span>Tech Stack</h2>
+    <p class="section-desc">Every dependency justified. Zero bloat. Local-first with optional paid APIs.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                    <th>Why This</th>
+                    <th>Alternative Considered</th>
+                    <th>Why Not Alternative</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Runtime</strong></td>
+                    <td><code>Python 3.10+</code></td>
+                    <td>Matches LexiChunk's Python support matrix</td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><strong>Build</strong></td>
+                    <td><code>pyproject.toml</code> + <code>setuptools</code></td>
+                    <td>Consistent with LexiChunk; PEP 517/518</td>
+                    <td>hatchling, poetry</td>
+                    <td>Unnecessary divergence from SDK conventions</td>
+                </tr>
+                <tr>
+                    <td><strong>SDK Under Test</strong></td>
+                    <td><code>lexichunk</code></td>
+                    <td>The thing we're proving</td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><strong>Baseline Chunker</strong></td>
+                    <td><code>langchain-text-splitters</code></td>
+                    <td>Industry-standard baseline; RecursiveCharacterTextSplitter is the default everyone uses</td>
+                    <td>Custom naive splitter</td>
+                    <td>Comparing against LangChain itself is more credible than a strawman</td>
+                </tr>
+                <tr>
+                    <td><strong>Embeddings (Local)</strong></td>
+                    <td><code>sentence-transformers</code></td>
+                    <td>Loads MiniLM, BGE locally. Zero API cost. Industry standard.</td>
+                    <td>fastembed</td>
+                    <td>sentence-transformers has broader model coverage and community</td>
+                </tr>
+                <tr>
+                    <td><strong>Embeddings (Paid)</strong></td>
+                    <td><code>voyageai</code></td>
+                    <td>Voyage Law 2 is the best legal embedding model per MLEB benchmarks (79.63 NDCG@10, beats OpenAI by 6%)</td>
+                    <td>OpenAI text-embedding-3-large</td>
+                    <td>Underperforms on legal text per MLEB. General-purpose rankings don't predict legal performance.</td>
+                </tr>
+                <tr>
+                    <td><strong>Vector Store</strong></td>
+                    <td><code>faiss-cpu</code></td>
+                    <td>Deterministic, fast, standard for academic benchmarks. No server needed.</td>
+                    <td>ChromaDB, Qdrant</td>
+                    <td>Added complexity for no benefit in a benchmark harness; FAISS flat index is the academic standard</td>
+                </tr>
+                <tr>
+                    <td><strong>Retrieval Metrics</strong></td>
+                    <td>Custom + <code>numpy</code> + <code>scipy</code></td>
+                    <td>P@k, R@k, MRR, NDCG are simple formulas. scipy for paired t-tests. No framework lock-in.</td>
+                    <td>RAGAS library directly</td>
+                    <td>RAGAS bundles LLM-judge; we want deterministic metrics first, LLM-judge as Phase 3 toggle</td>
+                </tr>
+                <tr>
+                    <td><strong>LLM Judge</strong></td>
+                    <td><code>deepeval</code></td>
+                    <td>pytest-native, supports faithfulness + answer relevancy, works with GPT-4o-mini. Toggled off by default.</td>
+                    <td>RAGAS, TruLens</td>
+                    <td>DeepEval is pytest-native (fits CI); RAGAS would also work — this is a soft preference</td>
+                </tr>
+                <tr>
+                    <td><strong>CLI Output</strong></td>
+                    <td><code>rich</code></td>
+                    <td>Beautiful terminal tables, progress bars, colour-coded comparisons</td>
+                    <td>tabulate, plain print</td>
+                    <td>rich is the modern standard; makes CLI output demo-worthy</td>
+                </tr>
+                <tr>
+                    <td><strong>HTML Reports</strong></td>
+                    <td><code>jinja2</code></td>
+                    <td>Template standalone HTML report with embedded charts (inline SVG/JS). No server needed to view.</td>
+                    <td>Plotly export</td>
+                    <td>Jinja2 gives full control over the report design; Plotly can be used within it</td>
+                </tr>
+                <tr>
+                    <td><strong>Dashboard</strong></td>
+                    <td><code>streamlit</code></td>
+                    <td>Best for multi-page research dashboards. Native dataframes, charts, file upload. Deploys free to Streamlit Cloud.</td>
+                    <td>Gradio</td>
+                    <td>Gradio excels at simple model demos; Streamlit handles complex layouts, navigation, and metric drilldowns better</td>
+                </tr>
+                <tr>
+                    <td><strong>Charts (in Streamlit)</strong></td>
+                    <td><code>plotly</code></td>
+                    <td>Interactive charts for comparing strategies. Streamlit has native Plotly support.</td>
+                    <td>matplotlib, altair</td>
+                    <td>Plotly's interactivity (hover, zoom) is essential for exploration</td>
+                </tr>
+                <tr>
+                    <td><strong>Linting/Types</strong></td>
+                    <td><code>ruff</code> + <code>mypy</code></td>
+                    <td>Matches LexiChunk's toolchain. Consistent engineering standards.</td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><strong>Testing</strong></td>
+                    <td><code>pytest</code></td>
+                    <td>Standard. DeepEval integrates natively.</td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ 5. REPO STRUCTURE ═══════════════ -->
+<section>
+    <h2><span class="num">05</span>Proposed Repo Structure</h2>
+    <p class="section-desc">Clean, navigable, consistent with LexiChunk's conventions.</p>
+
+    <pre>
+sdk-scaffolder/
+├── pyproject.toml                    # Package config, dependencies, extras
+├── README.md                         # Overview, quickstart, output examples
+├── EXTENSIBILITY.md                  # Standalone extensibility roadmap doc
+├── Makefile                          # make benchmark, make report, make dashboard
+│
+├── src/scaffolder/
+│   ├── __init__.py
+│   ├── config.py                     # Central config (models, strategies, paths)
+│   │
+│   ├── fixtures/                     # Document fixture framework
+│   │   ├── __init__.py               # FixtureManager + registry
+│   │   ├── loader.py                 # Load from file, URL, or string
+│   │   └── documents/               # Built-in fixtures (copied from LexiChunk)
+│   │       ├── uk_service_agreement.txt
+│   │       ├── uk_terms_conditions.txt
+│   │       ├── us_msa.txt
+│   │       ├── us_terms_of_service.txt
+│   │       └── eu_gdpr_excerpt.txt
+│   │
+│   ├── chunking/                     # Multi-strategy chunking
+│   │   ├── __init__.py
+│   │   ├── pipeline.py               # ChunkingPipeline orchestrator
+│   │   ├── strategies.py             # Strategy registry + wrappers
+│   │   └── models.py                 # ChunkSet, ChunkResult dataclasses
+│   │
+│   ├── embedding/                    # Embedding pipeline
+│   │   ├── __init__.py
+│   │   ├── pipeline.py               # EmbeddingPipeline with model toggle
+│   │   ├── models.py                 # Local (sentence-transformers) adapters
+│   │   ├── voyage.py                 # Voyage API adapter (paid, toggled)
+│   │   └── cache.py                  # Disk cache for embeddings
+│   │
+│   ├── retrieval/                    # Retrieval simulation
+│   │   ├── __init__.py
+│   │   ├── index.py                  # FAISS index management
+│   │   ├── simulator.py              # Query execution + result collection
+│   │   └── queries.py                # Curated query sets + annotations
+│   │
+│   ├── metrics/                      # Evaluation metrics
+│   │   ├── __init__.py
+│   │   ├── structural.py             # Clause fragmentation, definition coverage
+│   │   ├── retrieval.py              # P@k, R@k, MRR, NDCG
+│   │   ├── statistical.py            # Paired t-tests, confidence intervals
+│   │   └── llm_judge.py              # DeepEval integration (toggled)
+│   │
+│   ├── reporting/                    # Output generation
+│   │   ├── __init__.py
+│   │   ├── cli.py                    # Rich terminal output
+│   │   ├── json_export.py            # Structured JSON
+│   │   ├── html.py                   # Standalone HTML report (Jinja2)
+│   │   └── templates/
+│   │       └── report.html.j2        # HTML report template
+│   │
+│   └── dashboard/                    # Streamlit app
+│       ├── app.py                    # Main entrypoint
+│       ├── pages/
+│       │   ├── 01_upload.py          # Document upload + preview
+│       │   ├── 02_compare.py         # Side-by-side chunk comparison
+│       │   ├── 03_retrieval.py       # Live retrieval testing
+│       │   └── 04_metrics.py         # Metrics drilldown + charts
+│       └── components/
+│           ├── chunk_viewer.py       # Chunk visualisation with highlighting
+│           └── metric_cards.py       # Reusable metric display components
+│
+├── queries/                          # Query annotation files
+│   ├── uk_service_agreement.yaml     # Queries + known-relevant sections
+│   ├── us_msa.yaml
+│   └── README.md                     # How to add new query sets
+│
+├── tests/
+│   ├── test_chunking.py
+│   ├── test_embedding.py
+│   ├── test_retrieval.py
+│   ├── test_metrics.py
+│   └── test_reporting.py
+│
+├── results/                          # Generated output (gitignored)
+│   ├── .gitkeep
+│   └── (benchmark_*.json, report_*.html)
+│
+└── tasks/
+    └── proposal.html                 # This document
+    </pre>
+</section>
+
+<!-- ═══════════════ 6. METRICS FRAMEWORK ═══════════════ -->
+<section>
+    <h2><span class="num">06</span>Metrics Framework</h2>
+    <p class="section-desc">Two complementary metric families grounded against industry standards.</p>
+
+    <h3>Structural Quality Metrics (Phase 1a — no embeddings needed)</h3>
+    <p>These prove LexiChunk chunks <em>correctly</em>. Computed deterministically, zero cost.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>What It Measures</th>
+                    <th>Grounded Against</th>
+                    <th>LexiChunk Advantage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Clause Fragmentation Rate</strong></td>
+                    <td>% of chunks that split a clause mid-boundary</td>
+                    <td>Reuter et al. (NLLP 2025): structural chunking scored 0.59 nDCG vs 0.244 for fixed-size</td>
+                    <td>LexiChunk's clause-aware strategy should approach 0% fragmentation</td>
+                </tr>
+                <tr>
+                    <td><strong>Definition Preservation Rate</strong></td>
+                    <td>% of defined-term usages where the definition is accessible (in same chunk or linked metadata)</td>
+                    <td>Anthropic Contextual Retrieval: 35% reduction in retrieval failure with chunk context</td>
+                    <td>LexiChunk extracts + propagates definitions; baselines cannot</td>
+                </tr>
+                <tr>
+                    <td><strong>Cross-Reference Resolution Rate</strong></td>
+                    <td>% of detected cross-references resolved to target chunks</td>
+                    <td>No existing benchmark (this IS the novelty). EU regulation graph study had 3,600+ edges</td>
+                    <td>LexiChunk's cross-ref detector + resolver; baselines score 0%</td>
+                </tr>
+                <tr>
+                    <td><strong>Hierarchy Depth Retained</strong></td>
+                    <td>Avg hierarchical path depth per chunk (e.g., Article VII → Section 7.2 → 7.2(a) = depth 3)</td>
+                    <td>Ferraris et al. multi-layered retrieval validated hierarchical approach</td>
+                    <td>LexiChunk preserves full hierarchy path; baselines have depth 0</td>
+                </tr>
+                <tr>
+                    <td><strong>Chunk Size Distribution</strong></td>
+                    <td>Mean, median, std dev, min/max tokens per strategy</td>
+                    <td>Best practice: 512–1024 tokens for legal text; larger overlap for cross-ref-heavy docs</td>
+                    <td>LexiChunk respects natural clause boundaries; baselines produce uniform/arbitrary sizes</td>
+                </tr>
+                <tr>
+                    <td><strong>Clause Type Coverage</strong></td>
+                    <td>% of chunks classified into a legal clause type with confidence &gt; threshold</td>
+                    <td>LexiChunk's 24+ clause type classifier; unique in open-source</td>
+                    <td>Enables filtered retrieval ("find all indemnification clauses")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>Retrieval Quality Metrics (Phase 1b — requires embeddings)</h3>
+    <p>These prove LexiChunk chunks <em>retrieve better</em>. The real claim.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>What It Measures</th>
+                    <th>Industry Standard</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Precision@k</strong></td>
+                    <td>% of top-k retrieved chunks that are relevant</td>
+                    <td>RAGAS Context Precision; MLEB standard metric</td>
+                    <td>k = {1, 3, 5, 10}. Relevance from query annotations.</td>
+                </tr>
+                <tr>
+                    <td><strong>Recall@k</strong></td>
+                    <td>% of all relevant chunks captured in top-k</td>
+                    <td>RAGAS Context Recall; critical for legal completeness</td>
+                    <td>k = {1, 3, 5, 10}. Higher weight than precision for legal (missing a clause is worse than extra noise).</td>
+                </tr>
+                <tr>
+                    <td><strong>MRR</strong></td>
+                    <td>Mean reciprocal rank of first relevant result</td>
+                    <td>Standard IR metric; used in LegalBench-RAG</td>
+                    <td>Computed per-query, averaged across query set.</td>
+                </tr>
+                <tr>
+                    <td><strong>NDCG@10</strong></td>
+                    <td>Ranking quality with graded relevance</td>
+                    <td>Primary metric in MLEB (Massive Legal Embedding Benchmark)</td>
+                    <td>Graded relevance: exact clause match = 3, same section = 2, related = 1.</td>
+                </tr>
+                <tr>
+                    <td><strong>DRM Rate</strong></td>
+                    <td>% of queries where top-1 chunk comes from wrong document</td>
+                    <td>Reuter et al.: &gt;95% DRM with naive chunking on similar legal docs</td>
+                    <td>Test with structurally similar fixtures (2 UK docs, 2 US docs).</td>
+                </tr>
+                <tr>
+                    <td><strong>Statistical Significance</strong></td>
+                    <td>Whether improvements are statistically meaningful</td>
+                    <td>Paired t-test standard for IR evaluation</td>
+                    <td>Per-query paired t-test, LexiChunk vs each baseline, p &lt; 0.05.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>LLM-Judge Metrics (Phase 3 — toggled, paid API)</h3>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>What It Measures</th>
+                    <th>Target</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Faithfulness</strong></td>
+                    <td>% of generated claims supported by retrieved context</td>
+                    <td>&gt;0.9 (legal requires higher than general; Stanford found 17–33% hallucination baseline)</td>
+                    <td>~$10–15 for 100 queries via GPT-4o-mini</td>
+                </tr>
+                <tr>
+                    <td><strong>Answer Relevancy</strong></td>
+                    <td>How relevant generated response is to query</td>
+                    <td>&gt;0.8</td>
+                    <td>Included in same API calls</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ 7. QUERY STRATEGY ═══════════════ -->
+<section>
+    <h2><span class="num">07</span>Query Strategy</h2>
+    <p class="section-desc">Two tiers of queries that test exactly what LexiChunk claims to improve.</p>
+
+    <h3>Tier 1: Curated Queries Against 5 Fixtures (Phase 1b)</h3>
+    <p>Hand-annotated queries with known-relevant sections. Tests the five failure modes LexiChunk addresses:</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Failure Mode Tested</th>
+                    <th>Example Query</th>
+                    <th>Fixture</th>
+                    <th>Why Baselines Fail</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Clause fragmentation</strong></td>
+                    <td>"What are the termination provisions?"</td>
+                    <td>UK Service Agreement</td>
+                    <td>RCTS splits the termination clause across 2–3 chunks; retrieved chunk is incomplete</td>
+                </tr>
+                <tr>
+                    <td><strong>Orphaned cross-references</strong></td>
+                    <td>"What exceptions apply to the limitation of liability?"</td>
+                    <td>US MSA</td>
+                    <td>Exceptions are in a schedule referenced by "subject to Schedule 3"; baselines lose this link</td>
+                </tr>
+                <tr>
+                    <td><strong>Lost defined terms</strong></td>
+                    <td>"Define 'Material Adverse Effect'"</td>
+                    <td>US MSA</td>
+                    <td>Definition is in Section 1; usage is in Section 7; baselines separate them completely</td>
+                </tr>
+                <tr>
+                    <td><strong>Destroyed hierarchy</strong></td>
+                    <td>"What obligations does the service provider have under clause 4?"</td>
+                    <td>UK Service Agreement</td>
+                    <td>Without hierarchy metadata, embedding search can't scope to clause 4 specifically</td>
+                </tr>
+                <tr>
+                    <td><strong>Cross-document contamination</strong></td>
+                    <td>"What is the governing law for the UK agreement?"</td>
+                    <td>Multi-document (UK + US)</td>
+                    <td>Both docs have "Governing Law" sections with similar embeddings; DRM pulls wrong doc</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>Target: ~15–25 curated queries across the 5 fixtures, each annotated with the exact relevant section(s). Stored as YAML in <code>queries/</code>.</p>
+
+    <h3>Tier 2: LegalBench-RAG (Phase 3)</h3>
+    <p>6,858 queries with character-level ground truth. The gold standard for publication-grade results. Mini version (776 queries) for rapid iteration. Used alongside LLM-judge evaluation for the complete picture.</p>
+</section>
+
+<!-- ═══════════════ 8. TRADEOFFS ═══════════════ -->
+<section>
+    <h2><span class="num">08</span>Key Tradeoffs</h2>
+    <p class="section-desc">Decisions made and the reasoning behind them.</p>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>Standalone repo vs folded into LexiChunk</h4>
+            <span class="decision">Standalone (for now)</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>Pros of standalone</strong>
+                Separation of concerns — SDK is the tool, scaffolder is the proof. Can benchmark other chunkers without polluting SDK. Different dependency profile (sentence-transformers, faiss, streamlit are heavy). Independent release cycle.
+            </div>
+            <div>
+                <strong>When to fold in</strong>
+                If the benchmark harness stabilises and the core metrics become part of LexiChunk's CI quality gates, the <code>metrics/</code> and <code>chunking/</code> modules could move into <code>lexichunk/benchmarks/</code>. The Streamlit dashboard should always stay separate.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>Custom metrics vs RAGAS/DeepEval library</h4>
+            <span class="decision">Custom first, DeepEval for LLM-judge</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>Why custom for retrieval</strong>
+                P@k, R@k, MRR, NDCG are 10–20 line functions. Using RAGAS bundles in an LLM-judge dependency we don't want in Phase 1. Custom means zero API cost for deterministic metrics and full control over the evaluation loop.
+            </div>
+            <div>
+                <strong>Why DeepEval for LLM-judge</strong>
+                pytest-native (fits CI pipeline), well-maintained, supports GPT-4o-mini. When Phase 3 turns on the paid toggle, DeepEval gives us faithfulness + answer relevancy without building a judge from scratch.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>Streamlit vs Gradio</h4>
+            <span class="decision">Streamlit</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>Streamlit wins because</strong>
+                Multi-page navigation (upload → compare → retrieve → metrics). Native dataframe/chart support. More professional dashboard aesthetic. Better for complex layouts. Free deployment via Streamlit Community Cloud.
+            </div>
+            <div>
+                <strong>Gradio would win if</strong>
+                This were a simple "upload → see result" demo (Gradio excels there). Or if HuggingFace Spaces deployment were critical (Gradio is native). We may later add a lightweight Gradio demo for HF Spaces alongside the full Streamlit dashboard.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>Embedding model selection</h4>
+            <span class="decision">2 local free + 1 paid toggled</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>Why multiple models</strong>
+                MLEB benchmark shows legal-specific rankings diverge dramatically from general MTEB. Using 3 models proves results generalise. all-MiniLM (fast baseline) + bge-base (strong mid-tier) run locally for free. Voyage Law 2 (legal-specific, best in class) is the paid option.
+            </div>
+            <div>
+                <strong>Risk</strong>
+                sentence-transformers is a large dependency (~500MB with torch). Mitigated by making it a pip extra: <code>pip install scaffolder[local]</code> vs <code>pip install scaffolder[voyage]</code>. Core harness works without either.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>FAISS vs ChromaDB vs Qdrant</h4>
+            <span class="decision">FAISS</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>FAISS because</strong>
+                Deterministic (flat L2 index gives identical results every time). No server process. Academic standard for IR benchmarks. Fast enough for our corpus size. Single <code>faiss-cpu</code> dependency.
+            </div>
+            <div>
+                <strong>ChromaDB/Qdrant would add</strong>
+                Persistence, filtering, metadata queries. Not needed for benchmarking — we control the entire pipeline. If the Streamlit dashboard needs richer querying later, ChromaDB could be added as an optional backend.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>5 fixtures vs LegalBench-RAG from the start</h4>
+            <span class="decision">5 fixtures first, LegalBench-RAG in Phase 3</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>Why 5 fixtures first</strong>
+                Hand-annotated queries let us test exact failure modes (the 5 gaps LexiChunk addresses). Faster iteration. Results are interpretable — you can look at the actual document and verify. Good for demos ("here's a real UK service agreement, watch what happens").
+            </div>
+            <div>
+                <strong>Why LegalBench-RAG later</strong>
+                6,858 queries is publication-grade scale. Best deployed once the pipeline is stable and we're confident in results. Character-level ground truth means we can compute Token-IoU — but only worth the effort when preparing blog post / formal benchmark numbers.
+            </div>
+        </div>
+    </div>
+
+    <div class="tradeoff">
+        <div class="tradeoff-header">
+            <h4>LLM-judge always-on vs toggled</h4>
+            <span class="decision">Toggled off by default</span>
+        </div>
+        <div class="pros-cons">
+            <div>
+                <strong>Why toggled</strong>
+                Costs real money (GPT-4o-mini API calls). Non-deterministic — different runs may give different scores. The deterministic retrieval metrics (P@k, MRR, NDCG) are the primary proof. LLM-judge adds qualitative depth but shouldn't be a development dependency.
+            </div>
+            <div>
+                <strong>When to turn on</strong>
+                Phase 3, once deterministic metrics look strong. Run on 100-query subset. Results go into blog post and formal benchmark. Budget: ~$10–15 per full run.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ 9. GROUNDING ═══════════════ -->
+<section>
+    <h2><span class="num">09</span>Grounding Against Best Practices</h2>
+    <p class="section-desc">How each design decision maps to production legaltech RAG standards.</p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Best Practice (Source)</th>
+                    <th>What It Says</th>
+                    <th>How We Implement It</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>RAGAS Framework</strong><br><small>EACL 2024</small></td>
+                    <td>Evaluate retrieval with Context Precision + Recall; evaluate generation with Faithfulness + Answer Relevancy. 95% human agreement on faithfulness.</td>
+                    <td>Phase 1b: deterministic P@k/R@k (no LLM needed). Phase 3: DeepEval faithfulness + answer relevancy (RAGAS-aligned). Two-phase approach avoids premature API spend.</td>
+                </tr>
+                <tr>
+                    <td><strong>MLEB Benchmark</strong><br><small>Oct 2025</small></td>
+                    <td>Legal-specific embeddings dramatically outperform general models. Kanon 2 (#1), Voyage 3 Large (#2), Voyage Law 2 (#8) all beat OpenAI. General MTEB rankings don't predict legal performance.</td>
+                    <td>Include Voyage Law 2 as paid toggle. Test with multiple models to prove results generalise. Explicitly document that model choice matters for legal retrieval.</td>
+                </tr>
+                <tr>
+                    <td><strong>LegalBench-RAG</strong><br><small>arXiv 2408.10343</small></td>
+                    <td>First legal RAG benchmark. 6,858 queries with character-level ground truth. Chunking strategy significantly affects retrieval quality. Rerankers can hurt legal retrieval.</td>
+                    <td>Phase 3: full LegalBench-RAG evaluation. Phase 1b: aligned methodology (character-level relevance annotations on our 5 fixtures).</td>
+                </tr>
+                <tr>
+                    <td><strong>Summary-Augmented Chunking</strong><br><small>Reuter et al., NLLP 2025</small></td>
+                    <td>Prepending 150-char document summaries reduces DRM by ~50%. Generic summaries outperform expert-guided legal summaries.</td>
+                    <td>LexiChunk's context headers are analogous to SAC. We measure whether context-enriched chunks improve retrieval vs raw chunks.</td>
+                </tr>
+                <tr>
+                    <td><strong>Anthropic Contextual Retrieval</strong><br><small>Sep 2024</small></td>
+                    <td>Adding 50–100 tokens of chunk-specific context before embedding reduced top-20 retrieval failure by 35% (67% with BM25 + reranking).</td>
+                    <td>LexiChunk's <code>build_embedded_text()</code> adds context headers. We benchmark with and without context enrichment to quantify the improvement.</td>
+                </tr>
+                <tr>
+                    <td><strong>Document-Level Retrieval Mismatch</strong><br><small>Reuter et al., NLLP 2025</small></td>
+                    <td>&gt;95% DRM with naive chunking on structurally similar legal documents. The #1 failure mode for multi-document legal RAG.</td>
+                    <td>Explicit DRM metric. Test with structurally similar fixtures (2 UK docs, 2 US docs). LexiChunk's document_id metadata should eliminate DRM.</td>
+                </tr>
+                <tr>
+                    <td><strong>Stanford Legal RAG Hallucinations</strong><br><small>2025</small></td>
+                    <td>Commercial legal RAG tools (Lexis+ AI, Westlaw AI) hallucinate 17–33% of the time. Faithfulness &gt;0.9 is the target for legal.</td>
+                    <td>Phase 3 LLM-judge targets faithfulness &gt;0.9. We can cite Stanford's baseline as context: "commercial tools hallucinate 17–33%; our pipeline achieves X%".</td>
+                </tr>
+                <tr>
+                    <td><strong>LangSmith Evaluation</strong><br><small>LangChain</small></td>
+                    <td>Production RAG evaluation should separate retrieval quality from generation quality. Support human eval, heuristic checks, LLM-as-judge, and pairwise comparison.</td>
+                    <td>We do exactly this: structural metrics (heuristic), retrieval metrics (deterministic), LLM-judge (Phase 3). Pairwise comparison is the side-by-side Streamlit view.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════ 10. BUILD SEQUENCE ═══════════════ -->
+<section>
+    <h2><span class="num">10</span>Build Sequence</h2>
+    <p class="section-desc">What gets built in what order, with dependencies made explicit.</p>
+
+    <div class="mermaid-wrap">
+        <pre class="mermaid">
+gantt
+    title Build Sequence
+    dateFormat  X
+    axisFormat  Step %s
+
+    section Phase 1a - Harness
+    Repo skeleton + pyproject.toml        :p1a1, 0, 1
+    Config + data models                  :p1a2, 1, 2
+    FixtureManager + 5 docs               :p1a3, 2, 3
+    ChunkingPipeline + strategy registry  :p1a4, 3, 5
+    StructuralMetrics                     :p1a5, 5, 6
+    CLI reporter (rich)                   :p1a6, 6, 7
+    JSON export                           :p1a7, 6, 7
+
+    section Phase 1b - Retrieval
+    EmbeddingPipeline + cache             :p1b1, 7, 9
+    Voyage adapter (toggled)              :p1b2, 9, 10
+    FAISS VectorIndex                     :p1b3, 9, 10
+    Curated query set (YAML)              :p1b4, 7, 9
+    RetrievalSimulator                    :p1b5, 10, 12
+    RetrievalMetrics + t-tests            :p1b6, 12, 13
+    HTML report generator                 :p1b7, 13, 14
+
+    section Phase 2 - Dashboard
+    Streamlit app skeleton                :p2a, 14, 15
+    Upload + chunk comparison page        :p2b, 15, 17
+    Live retrieval page                   :p2c, 17, 19
+    Metrics drilldown page                :p2d, 19, 20
+
+    section Phase 3 - Gold Standard
+    DeepEval LLM-judge integration        :p3a, 20, 22
+    LegalBench-RAG dataset loader         :p3b, 20, 22
+    Full benchmark run + report           :p3c, 22, 24
+        </pre>
+    </div>
+
+    <h3>Dependency Graph</h3>
+    <div class="mermaid-wrap">
+        <pre class="mermaid">
+flowchart TD
+    A[Repo skeleton] --> B[Config + Models]
+    B --> C[FixtureManager]
+    B --> D[ChunkingPipeline]
+    C --> D
+    D --> E[StructuralMetrics]
+    D --> F[EmbeddingPipeline]
+    E --> G[CLI + JSON Reporter]
+    F --> H[VectorIndex]
+    H --> I[RetrievalSimulator]
+    I --> J[RetrievalMetrics]
+    J --> G
+    G --> K[HTML Report]
+
+    D --> L[Streamlit App]
+    E --> L
+    J --> L
+    F --> L
+
+    J --> M[DeepEval LLM-Judge]
+    I --> N[LegalBench-RAG Loader]
+    N --> J
+
+    style A fill:#1a3a1a,stroke:#4ade80
+    style B fill:#1a3a1a,stroke:#4ade80
+    style C fill:#1a3a1a,stroke:#4ade80
+    style D fill:#1a3a1a,stroke:#4ade80
+    style E fill:#1a3a1a,stroke:#4ade80
+    style G fill:#1a3a1a,stroke:#4ade80
+
+    style F fill:#1a1a3a,stroke:#6c8cff
+    style H fill:#1a1a3a,stroke:#6c8cff
+    style I fill:#1a1a3a,stroke:#6c8cff
+    style J fill:#1a1a3a,stroke:#6c8cff
+    style K fill:#1a1a3a,stroke:#6c8cff
+
+    style L fill:#2a1a3a,stroke:#a78bfa
+
+    style M fill:#3a2a1a,stroke:#fbbf24
+    style N fill:#3a2a1a,stroke:#fbbf24
+        </pre>
+    </div>
+</section>
+
+<!-- ═══════════════ 11. EXTENSIBILITY ═══════════════ -->
+<section>
+    <h2><span class="num">11</span>Extensibility Roadmap (Summary)</h2>
+    <p class="section-desc">To be detailed in the standalone <code>EXTENSIBILITY.md</code> design doc.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h4>Adding New Fixtures</h4>
+            <p>Drop a <code>.txt</code> file into <code>fixtures/documents/</code>, add a matching <code>.yaml</code> query file in <code>queries/</code> with annotated relevant sections. FixtureManager auto-discovers new files. README in <code>queries/</code> documents the annotation schema.</p>
+        </div>
+        <div class="card">
+            <h4>Adding Chunking Strategies</h4>
+            <p>Implement the <code>ChunkingStrategy</code> protocol (a <code>chunk(text, document_id) → List[Chunk]</code> method). Register in <code>strategies.py</code>. Automatically included in all benchmarks and comparisons.</p>
+        </div>
+        <div class="card">
+            <h4>Adding Embedding Models</h4>
+            <p>Implement the <code>Embedder</code> protocol (<code>embed(texts) → ndarray</code>). Local models via sentence-transformers adapter. API models via custom adapter (Voyage pattern as reference). Toggle via config.</p>
+        </div>
+        <div class="card">
+            <h4>Adding Metrics</h4>
+            <p>Structural metrics: add a function to <code>structural.py</code> that takes <code>ChunkSet</code> → <code>float</code>. Retrieval metrics: add to <code>retrieval.py</code> with the same <code>(retrieved, relevant) → float</code> signature. Auto-included in reports.</p>
+        </div>
+        <div class="card">
+            <h4>Adding Query Sets</h4>
+            <p>YAML format with query text, fixture reference, and list of relevant section identifiers. Supports graded relevance (exact match = 3, same section = 2, related = 1) for NDCG computation.</p>
+        </div>
+        <div class="card">
+            <h4>Future: LegalBench-RAG Integration</h4>
+            <p>Phase 3 adds a dataset loader that pulls LegalBench-RAG from HuggingFace, converts character-level annotations to our query format, and runs the full pipeline. Same evaluation code, larger dataset.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ 12. SUCCESS CRITERIA ═══════════════ -->
+<section>
+    <h2><span class="num">12</span>What Success Looks Like</h2>
+    <p class="section-desc">The numbers that make CTOs lean forward.</p>
+
+    <div class="metric-row">
+        <div class="metric-card">
+            <div class="metric-value">&lt;5%</div>
+            <div class="metric-label">Clause Fragmentation Rate<br>(baselines: 30–60%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">&gt;90%</div>
+            <div class="metric-label">Definition Preservation<br>(baselines: 0%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">+20–30%</div>
+            <div class="metric-label">Retrieval P@5 vs RCTS<br>(the headline number)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">0%</div>
+            <div class="metric-label">DRM Rate<br>(baselines: &gt;95%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">p &lt; 0.05</div>
+            <div class="metric-label">Statistical Significance<br>(paired t-test)</div>
+        </div>
+    </div>
+
+    <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 1rem;">
+        These targets are grounded in published research: Reuter et al. showed structural chunking scores 0.59 nDCG vs 0.244 for fixed-size (2.4x improvement).
+        Anthropic showed contextual retrieval reduces failure by 35%. LexiChunk combines both structural chunking AND contextual enrichment — a 20–30% P@5 improvement over RCTS is a conservative, defensible claim.
+    </p>
+</section>
+
+</div>
+
+<div class="footer">
+    LexiChunk Scaffolder Proposal &middot; Generated 2026-03-18 &middot; sdk-scaffolder repo
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#1a1a3a',
+            primaryTextColor: '#e0e0e8',
+            primaryBorderColor: '#6c8cff',
+            lineColor: '#4a4a6a',
+            secondaryColor: '#2a1a3a',
+            tertiaryColor: '#1a3a1a',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '13px',
+        },
+        flowchart: { curve: 'basis', padding: 20 },
+        gantt: {
+            fontSize: 12,
+            barHeight: 24,
+            barGap: 6,
+            topPadding: 40,
+            sidePadding: 60,
+        }
+    });
+</script>
+
+</body>
+</html>
