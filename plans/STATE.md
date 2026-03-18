@@ -21,7 +21,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 05  | completed | 2026-03-18 | Hierarchy depth + chunk CV metrics, __main__.py CLI, make benchmark e2e |
 | 06  | completed | 2026-03-18 | EmbeddingPipeline + SentenceTransformerAdapter + disk cache + 12 tests |
 | 07  | completed | 2026-03-18 | VectorIndex (FAISS), IndexRegistry, build_all_indices + 14 tests |
-| 08  | not_started | | Depends on Agent B queries (Day 3-4) |
+| 08  | completed | 2026-03-18 | RetrievalSimulator + query bridge + relevance matching + 10 tests |
 | 09  | not_started | | |
 | 10  | not_started | | |
 | 11  | not_started | | Depends on Agent B Voyage adapter (Day 6) |
