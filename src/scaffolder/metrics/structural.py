@@ -309,17 +309,13 @@ def chunk_size_cv(chunk_set: ChunkSet) -> float:
 # -- Convenience Function ---------------------------------------------------
 
 
-def compute_structural_metrics(
-    chunk_set: ChunkSet, document: Document
-) -> StructuralMetrics:
+def compute_structural_metrics(chunk_set: ChunkSet, document: Document) -> StructuralMetrics:
     """Compute all structural metrics for a ChunkSet against a Document."""
     return StructuralMetrics(
         strategy=chunk_set.strategy,
         document_id=chunk_set.document_id,
         clause_fragmentation_rate=clause_fragmentation_rate(chunk_set, document),
-        definition_preservation_rate=definition_preservation_rate(
-            chunk_set, document
-        ),
+        definition_preservation_rate=definition_preservation_rate(chunk_set, document),
         cross_ref_resolution_rate=cross_ref_resolution_rate(chunk_set, document),
         hierarchy_depth_retained=hierarchy_depth_retained(chunk_set, document),
         chunk_size_cv=chunk_size_cv(chunk_set),

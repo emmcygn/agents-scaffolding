@@ -133,11 +133,40 @@ class TestComputeStructuralMetrics:
         assert 0.0 <= metrics.definition_preservation_rate <= 1.0
         assert 0.0 <= metrics.cross_ref_resolution_rate <= 1.0
 
-    def test_placeholder_metrics_are_zero(self) -> None:
+    def test_hierarchy_and_cv_are_real(self) -> None:
         cs = _make_chunk_set([STRUCTURED_DOC.text])
         metrics = compute_structural_metrics(cs, STRUCTURED_DOC)
-        assert metrics.hierarchy_depth_retained == 0.0
-        assert metrics.chunk_size_cv == 0.0
+        assert 0.0 <= metrics.hierarchy_depth_retained <= 1.0
+        assert metrics.chunk_size_cv >= 0.0
+
+
+class TestHierarchyDepthRetained:
+    def test_single_chunk_preserves_depth(self) -> None:
+        cs = _make_chunk_set([STRUCTURED_DOC.text])
+        rate = hierarchy_depth_retained(cs, STRUCTURED_DOC)
+        assert rate > 0.0
+
+    def test_returns_float_in_range(self) -> None:
+        cs = _make_chunk_set([STRUCTURED_DOC.text[:50], STRUCTURED_DOC.text[50:]])
+        rate = hierarchy_depth_retained(cs, STRUCTURED_DOC)
+        assert 0.0 <= rate <= 1.0
+
+
+class TestChunkSizeCV:
+    def test_single_chunk_returns_zero(self) -> None:
+        cs = _make_chunk_set(["single chunk"])
+        cv = chunk_size_cv(cs)
+        assert cv == 0.0
+
+    def test_uniform_chunks_low_cv(self) -> None:
+        cs = _make_chunk_set(["a" * 100, "b" * 100, "c" * 100])
+        cv = chunk_size_cv(cs)
+        assert cv == 0.0
+
+    def test_varied_chunks_positive_cv(self) -> None:
+        cs = _make_chunk_set(["a" * 10, "b" * 1000])
+        cv = chunk_size_cv(cs)
+        assert cv > 0.5
 
 
 class TestGroundTruthCaching:

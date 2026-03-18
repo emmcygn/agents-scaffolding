@@ -18,7 +18,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 02  | completed | 2026-03-18 | FixtureManager + 5 legal documents + 13 tests |
 | 03  | completed | 2026-03-18 | ChunkingPipeline + 4 strategy wrappers + registry + 23 tests |
 | 04  | completed | 2026-03-18 | Structural metrics: fragmentation, definition preservation, cross-ref resolution + 12 tests |
-| 05  | not_started | | |
+| 05  | completed | 2026-03-18 | Hierarchy depth + chunk CV metrics, __main__.py CLI, make benchmark e2e |
 | 06  | not_started | | |
 | 07  | not_started | | |
 | 08  | not_started | | Depends on Agent B queries (Day 3-4) |
@@ -49,7 +49,7 @@ _(none)_
 | 03  | completed | 2026-03-18 | Query schema, 8 queries (uk_sa + us_msa), queries.py loader |
 | 04  | completed | 2026-03-18 | 22 queries across all 5 fixtures, CLI reporter, test_queries.py |
 | 05  | completed | 2026-03-18 | JSON export, CLI polish, Streamlit skeleton (3 pages + components) |
-| 06  | not_started | | |
+| 06  | completed | 2026-03-18 | Voyage adapter with rate limiting, Embedder protocol, 12 tests |
 | 07  | not_started | | Depends on Agent A ChunkingPipeline (Day 3) |
 | 08  | not_started | | |
 | 09  | not_started | | Depends on Agent A RetrievalSimulator (Day 8) |

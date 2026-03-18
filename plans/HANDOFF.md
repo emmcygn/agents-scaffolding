@@ -91,3 +91,14 @@ When an agent completes work that the other agent depends on, log it here. The o
 - `from scaffolder.queries import load_queries` — returns all 22 AnnotatedQuery objects
 - `from scaffolder.reporting.cli import render_structural_table`
 **Breaking changes:** None. Query YAML files complete — Agent A Day 8 dependency (queries) is now unblocked.
+
+### Agent B → Agent A | Day 06 Complete
+**What's ready:** Voyage AI embedding adapter with rate limiting, Embedder protocol, factory function
+**Files:**
+- `src/scaffolder/embedding/__init__.py` — `Embedder` protocol + `create_embedder()` factory
+- `src/scaffolder/embedding/voyage.py` — `VoyageEmbedder` class
+- `tests/test_voyage.py` — 12 tests (mocked, no API key needed)
+**Import paths:**
+- `from scaffolder.embedding import Embedder, create_embedder`
+- `from scaffolder.embedding.voyage import VoyageEmbedder`
+**Breaking changes:** `embedding/__init__.py` now has `Embedder` protocol. Agent A's local embedder should implement: `model_name` (property), `dimension` (property), `embed(texts)`, `embed_query(text)`. Update `create_embedder()` factory when local embedder is ready. Agent A Day 11 dependency (Voyage adapter) is now unblocked.
