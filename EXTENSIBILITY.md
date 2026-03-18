@@ -70,17 +70,70 @@ class MyStrategy:
         )
 ```
 
-### Registration
+### Registration in 5 Steps
 
-1. Add a new `StrategyName` enum value in `models.py`
-2. Create your strategy class in `src/scaffolder/chunking/strategies.py` (or a new file)
-3. Register in `src/scaffolder/chunking/__init__.py`:
+1. **Add enum value** in `models.py`:
+   ```python
+   class StrategyName(str, enum.Enum):
+       # ...existing values...
+       CHONKIE = "chonkie"
+   ```
 
-```python
-_STRATEGY_REGISTRY[StrategyName.MY_STRATEGY] = MyStrategy
-```
+2. **Create strategy class** in `src/scaffolder/chunking/strategies.py` (or a new file):
+   ```python
+   class ChonkieStrategy:
+       name = StrategyName.CHONKIE
 
-4. Add the strategy name to `VALID_STRATEGIES` in `config.py`
+       def chunk(self, document: Document) -> ChunkSet:
+           import time
+           from chonkie import SemanticChunker
+
+           start = time.perf_counter()
+           chunker = SemanticChunker(max_chunk_size=512)
+           raw_chunks = chunker.chunk(document.text)
+
+           chunks = tuple(
+               Chunk(
+                   id=f"{self.name.value}_{document.id}_{i}",
+                   text=c.text,
+                   document_id=document.id,
+                   strategy=self.name,
+                   index=i,
+                   metadata={"source": "chonkie"},
+               )
+               for i, c in enumerate(raw_chunks)
+           )
+
+           return ChunkSet(
+               strategy=self.name,
+               document_id=document.id,
+               chunks=chunks,
+               elapsed_seconds=time.perf_counter() - start,
+           )
+   ```
+
+3. **Register** in `src/scaffolder/chunking/__init__.py`:
+   ```python
+   _STRATEGY_REGISTRY[StrategyName.CHONKIE] = ChonkieStrategy
+   ```
+
+4. **Add to config** in `config.py`:
+   ```python
+   VALID_STRATEGIES = [..., "chonkie"]
+   ```
+
+5. **Test** your strategy:
+   ```python
+   def test_chonkie_strategy():
+       from scaffolder.chunking import get_strategy
+       from scaffolder.fixtures import FixtureManager
+
+       strategy = get_strategy(StrategyName.CHONKIE)
+       doc = FixtureManager().load_all()[0]
+       result = strategy.chunk(doc)
+       assert result.count > 0
+       assert all(c.text for c in result.chunks)
+   ```
 
 ## 4. Adding Embedding Models
 
@@ -88,41 +141,99 @@ _STRATEGY_REGISTRY[StrategyName.MY_STRATEGY] = MyStrategy
 
 The `EmbeddingPipeline` in `embedding/pipeline.py` supports any sentence-transformers model. To add a new one:
 
-1. Add a new `EmbeddingModelName` enum value in `models.py`
-2. Add the HuggingFace model ID mapping in `embedding/pipeline.py`:
+1. **Add enum value** in `models.py`:
+   ```python
+   class EmbeddingModelName(str, enum.Enum):
+       # ...existing values...
+       NOMIC_EMBED = "nomic-embed-text-v1.5"
+   ```
 
-```python
-_MODEL_IDS[EmbeddingModelName.MY_MODEL] = "org/my-model-name"
-```
+2. **Add HuggingFace model ID** in `embedding/pipeline.py`:
+   ```python
+   _MODEL_IDS[EmbeddingModelName.NOMIC_EMBED] = "nomic-ai/nomic-embed-text-v1.5"
+   ```
 
-3. Add to `VALID_EMBEDDING_MODELS` in `config.py`
+3. **Add to config** in `config.py`:
+   ```python
+   VALID_EMBEDDING_MODELS = [..., "nomic-embed-text-v1.5"]
+   ```
+
+4. **Test** that embedding works:
+   ```python
+   def test_nomic_embedding():
+       from scaffolder.embedding.pipeline import EmbeddingPipeline
+       from scaffolder.models import EmbeddingModelName
+
+       pipeline = EmbeddingPipeline()
+       embeddings = pipeline.embed_texts(["test clause"], EmbeddingModelName.NOMIC_EMBED)
+       assert embeddings.shape[0] == 1
+       assert embeddings.shape[1] > 0
+   ```
 
 ### API-Based Models
 
 Follow the `VoyageEmbedder` pattern in `embedding/voyage.py`:
 
-1. Implement `embed(texts)` and `embed_query(text)` methods
-2. Handle rate limiting and error cases
+1. Implement the `Embedder` protocol: `model_name` (property), `dimension` (property), `embed_texts(texts)` method
+2. Handle rate limiting, retries, and error cases
 3. Register in the `EmbeddingPipeline._get_adapter()` factory
+4. Gate availability on the API key environment variable (see `embedding/__init__.py`)
 
 ## 5. Adding Metrics
 
 ### Structural Metrics
 
-Add new metric functions in `src/scaffolder/metrics/structural.py`. Each function takes a `ChunkSet` and returns a float:
+Add new metric functions in `src/scaffolder/metrics/structural.py`. Each function takes a `ChunkSet` and `Document` and returns a float:
 
 ```python
-def my_metric(chunk_set: ChunkSet, document: Document) -> float:
-    """Compute my custom metric. Returns 0.0-1.0."""
-    # Your logic here
-    return score
+def citation_preservation_rate(chunk_set: ChunkSet, document: Document) -> float:
+    """Measure how well legal citations are preserved within chunks.
+
+    Returns 0.0-1.0 where 1.0 means all citations are kept intact.
+    """
+    import re
+
+    citation_pattern = re.compile(r"\b\d+\s+U\.S\.C\.\s+§\s*\d+")
+    doc_citations = set(citation_pattern.findall(document.text))
+
+    if not doc_citations:
+        return 1.0  # No citations to fragment
+
+    preserved = 0
+    for citation in doc_citations:
+        # Check if the full citation appears in at least one chunk
+        if any(citation in c.text for c in chunk_set.chunks):
+            preserved += 1
+
+    return preserved / len(doc_citations)
 ```
 
-Wire it into the `compute_structural_metrics()` pipeline function.
+Wire it into `compute_structural_metrics()` in the same file, and add a corresponding field to `StructuralMetrics` in `models.py`.
 
 ### Retrieval Metrics
 
-Add to `src/scaffolder/metrics/` following the existing pattern. Retrieval metrics take `RetrievalResult` objects and compute precision, recall, etc.
+Add to `src/scaffolder/metrics/retrieval.py`. Retrieval metrics take `RetrievalResult` objects:
+
+```python
+def reciprocal_rank_fusion(results_a: list[RetrievalResult], results_b: list[RetrievalResult], k: int = 60) -> list[float]:
+    """Compute RRF scores combining two retrieval result sets."""
+    # Implementation here
+    ...
+```
+
+### Testing Custom Metrics
+
+```python
+def test_citation_preservation():
+    from scaffolder.metrics.structural import citation_preservation_rate
+
+    # Create test ChunkSet with known citations
+    chunks = (Chunk(id="c1", text="Under 42 U.S.C. § 1983...", ...),)
+    chunk_set = ChunkSet(strategy=StrategyName.LEXICHUNK, ...)
+    doc = Document(text="Under 42 U.S.C. § 1983, the plaintiff...", ...)
+
+    assert citation_preservation_rate(chunk_set, doc) == 1.0
+```
 
 ## 6. Adding Query Sets
 

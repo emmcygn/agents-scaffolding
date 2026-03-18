@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import streamlit as st
 
@@ -23,6 +23,71 @@ _FIXTURE_IDS = [
     "us_terms_of_service",
     "eu_gdpr_excerpt",
 ]
+
+MAX_UPLOAD_SIZE_BYTES = 100 * 1024  # 100 KB
+MAX_DOCUMENT_CHARS = 200_000
+MIN_DOCUMENT_CHARS = 50
+
+
+def _validate_upload(uploaded_file: Any) -> tuple[str | None, str | None]:
+    """Validate an uploaded file.
+
+    Returns (content, None) on success, (None, error_message) on failure.
+    """
+    file_size = uploaded_file.size
+    if file_size > MAX_UPLOAD_SIZE_BYTES:
+        return None, (
+            f"File too large: {file_size / 1024:.0f} KB. "
+            f"Maximum allowed: {MAX_UPLOAD_SIZE_BYTES // 1024} KB."
+        )
+
+    raw_bytes = uploaded_file.getvalue()
+    content: str | None = None
+
+    for encoding in ("utf-8", "utf-8-sig", "latin-1", "cp1252"):
+        try:
+            content = raw_bytes.decode(encoding)
+            break
+        except (UnicodeDecodeError, ValueError):
+            continue
+
+    if content is None:
+        return None, (
+            "Unable to decode file. Please ensure it is a UTF-8 or Latin-1 encoded text file."
+        )
+
+    if len(content.strip()) < MIN_DOCUMENT_CHARS:
+        return None, (
+            f"Document too short ({len(content.strip())} characters). "
+            f"Minimum: {MIN_DOCUMENT_CHARS} characters."
+        )
+
+    if len(content) > MAX_DOCUMENT_CHARS:
+        content = content[:MAX_DOCUMENT_CHARS]
+
+    return content, None
+
+
+def _validate_document(doc: Document) -> str | None:
+    """Validate a document before chunking.
+
+    Returns None if valid, error message if invalid.
+    """
+    text = doc.text.strip()
+
+    if not text:
+        return "Document is empty. Please provide a document with text content."
+
+    if len(text) < MIN_DOCUMENT_CHARS:
+        return (
+            f"Document too short ({len(text)} characters). "
+            f"Chunking requires at least {MIN_DOCUMENT_CHARS} characters."
+        )
+
+    if "\x00" in doc.text:
+        return "Document appears to contain binary content. Please upload a text file."
+
+    return None
 
 
 def _load_fixture(fixture_name: str) -> Document:
@@ -95,26 +160,17 @@ def render_page() -> None:
 
     elif doc_source == "Upload file":
         uploaded = st.file_uploader(
-            "Upload a .txt legal document",
+            f"Upload a .txt legal document (max {MAX_UPLOAD_SIZE_BYTES // 1024} KB)",
             type=["txt"],
             key="file_upload",
         )
         if uploaded is not None:
-            if uploaded.size > 100 * 1024:
-                st.error(f"File too large: {uploaded.size / 1024:.0f} KB. Maximum allowed: 100 KB.")
-            else:
-                try:
-                    content = uploaded.getvalue().decode("utf-8")
-                except UnicodeDecodeError:
-                    st.error("File encoding error. Please upload a UTF-8 encoded text file.")
-                    content = None
-                if content is not None:
-                    if len(content.strip()) < 50:
-                        st.warning("Document is very short. Results may not be meaningful.")
-                    document = _create_document_from_text(
-                        content, uploaded.name.replace(".txt", "")
-                    )
-                    st.success(f"Loaded: {uploaded.name} ({len(content):,} chars)")
+            content, error = _validate_upload(uploaded)
+            if error:
+                st.error(error)
+            elif content is not None:
+                document = _create_document_from_text(content, uploaded.name.replace(".txt", ""))
+                st.success(f"Loaded: {uploaded.name} ({len(content):,} chars)")
 
     elif doc_source == "Paste text":
         text = st.text_area(
@@ -151,6 +207,11 @@ def render_page() -> None:
         return
 
     if run_button and document is not None:
+        validation_error = _validate_document(document)
+        if validation_error:
+            st.error(validation_error)
+            return
+
         lexi_key = f"chunks_{document.id}_lexichunk"
         base_key = f"chunks_{document.id}_{baseline_value}"
 
