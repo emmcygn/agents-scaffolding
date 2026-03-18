@@ -76,3 +76,18 @@ When an agent completes work that the other agent depends on, log it here. The o
 - `from scaffolder.chunking import LexiChunkStrategy, RCTSStrategy, SentenceSplitStrategy, FixedSizeStrategy`
 **Usage:** `pipeline = ChunkingPipeline(get_all_strategies()); results = pipeline.run(docs)` returns `list[StrategyResult]`
 **Breaking changes:** None. Agent B's Streamlit Day 7 dependency is now unblocked.
+
+### Agent B → Agent A | Day 04 Complete
+**What's ready:** All 22 query annotations across 5 fixtures, CLI reporter for structural metrics
+**Files:**
+- `queries/uk_terms_conditions.yaml` — 4 queries
+- `queries/us_terms_of_service.yaml` — 4 queries
+- `queries/eu_gdpr_excerpt.yaml` — 4 queries
+- `queries/uk_service_agreement.yaml` — +1 cross-doc contamination query (5 total)
+- `queries/us_msa.yaml` — +1 cross-doc contamination query (5 total)
+- `src/scaffolder/reporting/cli.py` — `render_structural_table()`, `render_summary_header()`
+- `tests/test_queries.py` — 10 tests
+**Import paths:**
+- `from scaffolder.queries import load_queries` — returns all 22 AnnotatedQuery objects
+- `from scaffolder.reporting.cli import render_structural_table`
+**Breaking changes:** None. Query YAML files complete — Agent A Day 8 dependency (queries) is now unblocked.

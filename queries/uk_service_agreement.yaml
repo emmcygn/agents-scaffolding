@@ -75,3 +75,17 @@ queries:
       Tests destroyed hierarchy. The query asks about a parent clause, so all
       sub-clauses are relevant. Baseline chunkers may separate 2.1, 2.2, and
       2.3 from the clause 2 heading, losing the hierarchical relationship.
+
+  - id: uk_sa_q5
+    text: "What are the limitation of liability provisions?"
+    failure_mode: cross_doc_contamination
+    relevant_sections:
+      - section_id: "clause_limitation_liability"
+        relevance: 3
+        description: "UK service agreement limitation of liability"
+    notes: >
+      Tests cross-document contamination. Both UK and US documents have
+      limitation of liability clauses. The retriever must prefer the UK
+      service agreement clause when this query is asked in the context
+      of the UK document. A jurisdiction-unaware chunker may surface
+      the US clause.

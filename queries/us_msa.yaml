@@ -69,3 +69,16 @@ queries:
       clause plus a schedule. Baseline chunkers treat schedules as separate
       flat text, losing the relationship between the main clause and its
       schedule.
+
+  - id: us_msa_q5
+    text: "What data protection obligations does the service provider have?"
+    failure_mode: cross_doc_contamination
+    relevant_sections:
+      - section_id: "clause_data_protection"
+        relevance: 3
+        description: "US MSA data protection provisions"
+    notes: >
+      Tests cross-document contamination. Both UK/EU and US documents
+      address data protection, but under different legal frameworks
+      (GDPR vs US state privacy laws). The retriever should surface
+      the US-specific clause for this US document query.
