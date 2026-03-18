@@ -51,7 +51,7 @@ _(none)_
 | 05  | completed | 2026-03-18 | JSON export, CLI polish, Streamlit skeleton (3 pages + components) |
 | 06  | completed | 2026-03-18 | Voyage adapter with rate limiting, Embedder protocol, 12 tests |
 | 07  | completed | 2026-03-18 | Streamlit page_compare: fixture/upload/paste, side-by-side chunks, metrics |
-| 08  | not_started | | |
+| 08  | completed | 2026-03-18 | Chunk viewer: clause-type colours, term badges, hierarchy, size chart |
 | 09  | not_started | | Depends on Agent A RetrievalSimulator (Day 8) |
 | 10  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
 | 11  | not_started | | |

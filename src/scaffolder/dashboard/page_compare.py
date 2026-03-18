@@ -179,9 +179,12 @@ def render_page() -> None:
 
 
 def _render_results(lexi: ChunkSet, baseline: ChunkSet, baseline_name: str) -> None:
-    """Render the comparison results."""
+    """Render the comparison results using enhanced components."""
+    from scaffolder.dashboard.components import render_chunk_list, render_chunk_size_chart
+
     st.subheader("3. Results")
 
+    # Summary metrics row
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         delta = baseline.count - lexi.count
@@ -198,27 +201,16 @@ def _render_results(lexi: ChunkSet, baseline: ChunkSet, baseline_name: str) -> N
     with col4:
         st.metric("LexiChunk Time", f"{lexi.elapsed_seconds:.3f}s")
 
+    # Chunk size distribution chart
+    render_chunk_size_chart(lexi, baseline, baseline_name)
+
     st.markdown("---")
 
-    # Side-by-side chunk display
+    # Side-by-side chunk display with enhanced components
     left, right = st.columns(2)
 
     with left:
-        st.markdown(f"**LexiChunk** ({lexi.count} chunks)")
-        for i, chunk in enumerate(lexi.chunks):
-            with st.expander(f"Chunk {i + 1} — {chunk.char_count} chars", expanded=i < 3):
-                clause_type = chunk.metadata.get("clause_type", "")
-                if clause_type:
-                    st.caption(f"Clause: {clause_type}")
-
-                terms = chunk.metadata.get("defined_terms", [])
-                if terms:
-                    st.caption(f"Defined terms: {', '.join(str(t) for t in terms)}")
-
-                st.text(chunk.text)
+        render_chunk_list(lexi, strategy_label="LexiChunk", show_metadata=True)
 
     with right:
-        st.markdown(f"**{baseline_name}** ({baseline.count} chunks)")
-        for i, chunk in enumerate(baseline.chunks):
-            with st.expander(f"Chunk {i + 1} — {chunk.char_count} chars", expanded=i < 3):
-                st.text(chunk.text)
+        render_chunk_list(baseline, strategy_label=baseline_name, show_metadata=False)
