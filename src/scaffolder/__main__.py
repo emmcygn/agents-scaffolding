@@ -56,8 +56,7 @@ def main() -> None:
     if args.command == "benchmark":
         run_structural_benchmark(args)
     elif args.command == "benchmark-embed":
-        print("Embedding benchmark not yet implemented (Day 10).")
-        sys.exit(1)
+        run_retrieval_benchmark(args)
     elif args.command == "report":
         print("HTML report not yet implemented (Day 14).")
         sys.exit(1)
@@ -95,6 +94,77 @@ def run_structural_benchmark(args: argparse.Namespace) -> None:
     # Export JSON if requested
     if args.json:
         json_path = args.output_dir / "structural_benchmark.json"
+        export_json(result, json_path)
+        print(f"\nJSON exported to: {json_path}")
+
+
+def run_retrieval_benchmark(args: argparse.Namespace) -> None:
+    """Run full benchmark including embeddings and retrieval."""
+    from scaffolder.embedding import EmbeddingPipeline
+    from scaffolder.metrics.retrieval import compute_retrieval_metrics
+    from scaffolder.metrics.statistical import compute_all_significance
+    from scaffolder.models import EmbeddingModelName
+    from scaffolder.retrieval import RetrievalSimulator, build_all_indices
+    from scaffolder.retrieval.simulator import load_queries_from_yaml
+
+    fm = FixtureManager()
+    documents = fm.load_all()
+
+    # Phase 1: Chunking
+    strategies = get_all_strategies()
+    pipeline = ChunkingPipeline(strategies)
+    strategy_results = pipeline.run(documents)
+
+    models = [EmbeddingModelName.MINILM]
+    result = BenchmarkResult(
+        timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
+        strategies=[sr.strategy for sr in strategy_results],
+        documents=[d.id for d in documents],
+        models=models,
+        strategy_results=strategy_results,
+    )
+
+    # Phase 2: Structural metrics
+    for sr in strategy_results:
+        for cs in sr.chunk_sets:
+            doc = fm.get_by_id(cs.document_id)
+            sm = compute_structural_metrics(cs, doc)
+            result.structural_metrics.append(sm)
+
+    # Phase 3: Embedding + Indexing
+    emb_pipeline = EmbeddingPipeline(models=models)
+    registry = build_all_indices(strategy_results, emb_pipeline, models)
+
+    # Phase 4: Retrieval simulation
+    queries = load_queries_from_yaml()
+
+    simulator = RetrievalSimulator(
+        index_registry=registry,
+        embedding_pipeline=emb_pipeline,
+    )
+    retrieval_results = simulator.run(
+        queries=queries,
+        strategies=[sr.strategy for sr in strategy_results],
+        models=models,
+        k=10,
+    )
+
+    # Phase 5: Retrieval metrics
+    for rr in retrieval_results:
+        rm = compute_retrieval_metrics(rr)
+        result.retrieval_metrics.append(rm)
+
+    # Phase 6: Statistical significance
+    result.significance_results = list(compute_all_significance(result.retrieval_metrics))
+
+    # Output
+    from rich.console import Console
+
+    console = Console(force_terminal=True)
+    render_benchmark(result, console=console)
+
+    if args.json:
+        json_path = args.output_dir / "full_benchmark.json"
         export_json(result, json_path)
         print(f"\nJSON exported to: {json_path}")
 
