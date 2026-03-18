@@ -98,9 +98,7 @@ def compute_significance(
 
         improvement_pct = ((mean_a - mean_b) / mean_b * 100) if mean_b > 0 else 0.0
 
-        t_stat, p_value, significant, effect_size = paired_t_test(
-            values_a, values_b, alpha=alpha
-        )
+        t_stat, p_value, significant, effect_size = paired_t_test(values_a, values_b, alpha=alpha)
 
         results.append(
             SignificanceResult(
