@@ -54,50 +54,43 @@ class TestMetricRanges:
     def test_clause_fragmentation_rate_in_range(self) -> None:
         for sm in _get_result().structural_metrics:
             assert 0.0 <= sm.clause_fragmentation_rate <= 1.0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"CFR={sm.clause_fragmentation_rate}"
+                f"{sm.strategy.value}/{sm.document_id}: CFR={sm.clause_fragmentation_rate}"
             )
 
     def test_definition_preservation_rate_in_range(self) -> None:
         for sm in _get_result().structural_metrics:
             assert 0.0 <= sm.definition_preservation_rate <= 1.0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"DPR={sm.definition_preservation_rate}"
+                f"{sm.strategy.value}/{sm.document_id}: DPR={sm.definition_preservation_rate}"
             )
 
     def test_cross_ref_resolution_rate_in_range(self) -> None:
         for sm in _get_result().structural_metrics:
             assert 0.0 <= sm.cross_ref_resolution_rate <= 1.0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"CRRR={sm.cross_ref_resolution_rate}"
+                f"{sm.strategy.value}/{sm.document_id}: CRRR={sm.cross_ref_resolution_rate}"
             )
 
     def test_hierarchy_depth_retained_in_range(self) -> None:
         for sm in _get_result().structural_metrics:
             assert 0.0 <= sm.hierarchy_depth_retained <= 1.0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"HDR={sm.hierarchy_depth_retained}"
+                f"{sm.strategy.value}/{sm.document_id}: HDR={sm.hierarchy_depth_retained}"
             )
 
     def test_chunk_size_cv_non_negative(self) -> None:
         for sm in _get_result().structural_metrics:
             assert sm.chunk_size_cv >= 0.0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"CV={sm.chunk_size_cv}"
+                f"{sm.strategy.value}/{sm.document_id}: CV={sm.chunk_size_cv}"
             )
 
     def test_chunk_count_positive(self) -> None:
         for sm in _get_result().structural_metrics:
             assert sm.chunk_count > 0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"count={sm.chunk_count}"
+                f"{sm.strategy.value}/{sm.document_id}: count={sm.chunk_count}"
             )
 
     def test_avg_chunk_chars_positive(self) -> None:
         for sm in _get_result().structural_metrics:
             assert sm.avg_chunk_chars > 0, (
-                f"{sm.strategy.value}/{sm.document_id}: "
-                f"avg={sm.avg_chunk_chars}"
+                f"{sm.strategy.value}/{sm.document_id}: avg={sm.avg_chunk_chars}"
             )
 
 
@@ -131,6 +124,4 @@ class TestCompositeScores:
     def test_composite_in_range(self) -> None:
         for sm in _get_result().structural_metrics:
             score = self._composite(sm)
-            assert 0.0 <= score <= 1.0, (
-                f"{sm.strategy.value}/{sm.document_id}: composite={score}"
-            )
+            assert 0.0 <= score <= 1.0, f"{sm.strategy.value}/{sm.document_id}: composite={score}"
