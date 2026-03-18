@@ -28,7 +28,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 12  | completed | 2026-03-18 | LexiChunkContextualStrategy + _build_context_header + registry (5 strategies) + 15 tests |
 | 13  | completed | 2026-03-18 | HTML report skeleton + structural charts + Plotly + Jinja2 template + 13 tests |
 | 14  | completed | 2026-03-18 | Wire make report CLI, JSON reconstruction, retrieval/significance/methodology in template |
-| 15  | not_started | | |
+| 15  | completed | 2026-03-18 | docs/metrics.md (10 metrics + formulas), sanity tests (11 tests, all passing) |
 | 16  | not_started | | |
 | 17  | not_started | | |
 | 18  | completed | 2026-03-18 | PAIR: README benchmark results, architecture diagram, actual metrics |
