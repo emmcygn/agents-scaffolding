@@ -100,9 +100,21 @@ def render_page() -> None:
             key="file_upload",
         )
         if uploaded is not None:
-            content = uploaded.getvalue().decode("utf-8")
-            document = _create_document_from_text(content, uploaded.name.replace(".txt", ""))
-            st.success(f"Loaded: {uploaded.name} ({len(content):,} chars)")
+            if uploaded.size > 100 * 1024:
+                st.error(f"File too large: {uploaded.size / 1024:.0f} KB. Maximum allowed: 100 KB.")
+            else:
+                try:
+                    content = uploaded.getvalue().decode("utf-8")
+                except UnicodeDecodeError:
+                    st.error("File encoding error. Please upload a UTF-8 encoded text file.")
+                    content = None
+                if content is not None:
+                    if len(content.strip()) < 50:
+                        st.warning("Document is very short. Results may not be meaningful.")
+                    document = _create_document_from_text(
+                        content, uploaded.name.replace(".txt", "")
+                    )
+                    st.success(f"Loaded: {uploaded.name} ({len(content):,} chars)")
 
     elif doc_source == "Paste text":
         text = st.text_area(

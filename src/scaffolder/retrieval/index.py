@@ -53,10 +53,7 @@ class VectorIndex:
     ) -> None:
         """Add chunks and their embeddings to the index."""
         if len(chunks) != embeddings.shape[0]:
-            msg = (
-                f"Chunks ({len(chunks)}) and embeddings ({embeddings.shape[0]}) "
-                f"length mismatch."
-            )
+            msg = f"Chunks ({len(chunks)}) and embeddings ({embeddings.shape[0]}) length mismatch."
             raise ValueError(msg)
         if embeddings.shape[1] != self._dimension:
             msg = (
@@ -68,9 +65,7 @@ class VectorIndex:
         embeddings = np.ascontiguousarray(embeddings, dtype=np.float32)
         self._chunks.extend(chunks)
         self._index.add(embeddings)
-        logger.debug(
-            "Added %d vectors to index (total: %d)", len(chunks), self.size
-        )
+        logger.debug("Added %d vectors to index (total: %d)", len(chunks), self.size)
 
     def search(
         self,
@@ -146,9 +141,7 @@ class IndexRegistry:
         )
         return index
 
-    def get(
-        self, strategy: StrategyName, model: EmbeddingModelName
-    ) -> VectorIndex:
+    def get(self, strategy: StrategyName, model: EmbeddingModelName) -> VectorIndex:
         """Get a previously built index.
 
         Raises:
@@ -156,13 +149,8 @@ class IndexRegistry:
         """
         key = IndexKey(strategy=strategy, model=model)
         if key not in self._indices:
-            available = [
-                (k.strategy.value, k.model.value) for k in self._indices
-            ]
-            msg = (
-                f"No index for ({strategy.value}, {model.value}). "
-                f"Available: {available}"
-            )
+            available = [(k.strategy.value, k.model.value) for k in self._indices]
+            msg = f"No index for ({strategy.value}, {model.value}). Available: {available}"
             raise KeyError(msg)
         return self._indices[key]
 
@@ -194,9 +182,7 @@ def build_all_indices(
             all_chunks.extend(cs.chunks)
 
         if not all_chunks:
-            logger.warning(
-                "No chunks for strategy %s, skipping.", sr.strategy.value
-            )
+            logger.warning("No chunks for strategy %s, skipping.", sr.strategy.value)
             continue
 
         for model in models:

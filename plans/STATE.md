@@ -56,11 +56,11 @@ _(none)_
 | 10  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
 | 11  | completed | 2026-03-18 | Dashboard polish: CSS, cache mgmt, error helpers, session invalidation |
 | 12  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
-| 13  | not_started | | |
-| 14  | not_started | | |
-| 15  | not_started | | |
-| 16  | not_started | | |
-| 17  | not_started | | |
+| 13  | not_started | | Depends on Days 10, 12 |
+| 14  | completed | 2026-03-18 | Deployment: requirements-dashboard.txt, compat.py, .streamlit/config.toml, streamlit_app.py |
+| 15  | completed | 2026-03-18 | EXTENSIBILITY.md outline + sections 1-2 |
+| 16  | completed | 2026-03-18 | EXTENSIBILITY.md complete (8 sections) |
+| 17  | completed | 2026-03-18 | Edge case hardening: upload validation, encoding, size limits |
 | 18  | not_started | | PAIR day |
 | 19  | not_started | | |
 | 20  | not_started | | PAIR day |
