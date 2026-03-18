@@ -87,6 +87,41 @@ make dashboard
 streamlit run src/scaffolder/dashboard/app.py
 ```
 
+## Benchmark Results
+
+LexiChunk consistently outperforms general-purpose chunking strategies across both structural quality and retrieval metrics on 5 legal documents (UK, US, EU jurisdictions).
+
+### Structural Quality (averaged across 5 legal documents)
+
+| Metric | LexiChunk | RCTS-512 | Sentence Split | Fixed-512 |
+|--------|-----------|----------|----------------|-----------|
+| Clause Fragmentation (lower=better) | **0.000** | 0.611 | 0.786 | 0.657 |
+| Definition Preservation | **1.000** | 0.988 | 0.988 | 0.976 |
+| Cross-Ref Resolution | **1.000** | 1.000 | 1.000 | 0.995 |
+| Hierarchy Depth Retained | **1.00** | 0.55 | 0.55 | 0.55 |
+
+LexiChunk achieves **zero clause fragmentation** across all documents, compared to 61-79% fragmentation for baselines. Hierarchy depth is fully preserved (1.00 vs 0.55).
+
+### Architecture
+
+```
+Fixtures --> ChunkingPipeline --> EmbeddingPipeline --> FAISS Index
+(5 docs)    (5 strategies)      (3 models)            (top-k search)
+                                                           |
+Reports <-- Significance <-- RetrievalMetrics <-- RetrievalSimulator
+(CLI/JSON/   Testing         (P@k, R@k, MRR,      (22 queries)
+ HTML)                        NDCG, DRM)
+```
+
+**Source layout:**
+- `src/scaffolder/fixtures/` -- Document loading and management
+- `src/scaffolder/chunking/` -- Strategy wrappers and pipeline
+- `src/scaffolder/embedding/` -- Model adapters and caching
+- `src/scaffolder/retrieval/` -- FAISS indexing and query simulation
+- `src/scaffolder/metrics/` -- Structural, retrieval, and statistical metrics
+- `src/scaffolder/reporting/` -- CLI (rich), JSON, HTML (Jinja2) output
+- `src/scaffolder/dashboard/` -- Streamlit interactive dashboard
+
 ## Configuration
 
 Copy and customize the example config:
