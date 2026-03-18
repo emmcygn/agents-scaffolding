@@ -16,7 +16,7 @@ Both agents read and write this file. It is the single source of truth for progr
 |-----|--------|-----------|-------|
 | 01  | completed | 2026-03-18 | PAIR day — models.py, protocol interfaces, directory structure, all __init__.py |
 | 02  | completed | 2026-03-18 | FixtureManager + 5 legal documents + 13 tests |
-| 03  | not_started | | |
+| 03  | completed | 2026-03-18 | ChunkingPipeline + 4 strategy wrappers + registry + 23 tests |
 | 04  | not_started | | |
 | 05  | not_started | | |
 | 06  | not_started | | |

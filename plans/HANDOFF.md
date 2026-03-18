@@ -67,3 +67,12 @@ When an agent completes work that the other agent depends on, log it here. The o
 - `src/scaffolder/queries.py` — `load_queries()` and `load_queries_for_document()` functions
 **Import paths:** `from scaffolder.queries import load_queries, AnnotatedQuery, RelevantSection`
 **Breaking changes:** None
+
+### Agent A → Agent B | Day 03 Complete
+**What's ready:** ChunkingPipeline with 4 strategies (LexiChunk, RCTS, SentenceSplit, FixedSize) and strategy registry.
+**Files:** `src/scaffolder/chunking/strategies.py`, `src/scaffolder/chunking/pipeline.py`, `src/scaffolder/chunking/__init__.py`, `tests/test_chunking.py`
+**Import paths:**
+- `from scaffolder.chunking import ChunkingPipeline, get_all_strategies, get_strategy`
+- `from scaffolder.chunking import LexiChunkStrategy, RCTSStrategy, SentenceSplitStrategy, FixedSizeStrategy`
+**Usage:** `pipeline = ChunkingPipeline(get_all_strategies()); results = pipeline.run(docs)` returns `list[StrategyResult]`
+**Breaking changes:** None. Agent B's Streamlit Day 7 dependency is now unblocked.

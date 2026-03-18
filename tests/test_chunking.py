@@ -1,0 +1,204 @@
+"""Tests for ChunkingPipeline and strategy wrappers."""
+
+from __future__ import annotations
+
+import pytest
+
+from scaffolder.chunking import (
+    ChunkingPipeline,
+    FixedSizeStrategy,
+    LexiChunkStrategy,
+    RCTSStrategy,
+    SentenceSplitStrategy,
+    get_all_strategies,
+    get_strategy,
+)
+from scaffolder.fixtures import FixtureManager
+from scaffolder.models import (
+    Document,
+    DocumentType,
+    Jurisdiction,
+    StrategyName,
+)
+
+TINY_DOC = Document(
+    id="test_doc",
+    text=(
+        "1. Definitions.\n"
+        '1.1 "Service Provider" means the party providing services under this Agreement.\n'
+        '1.2 "Client" means the party receiving services.\n'
+        "2. Obligations.\n"
+        "2.1 The Service Provider shall deliver services as defined in Section 1.1.\n"
+        "2.2 Subject to Clause 3, the Client shall pay the fees set out in Schedule 1.\n"
+        "3. Payment Terms.\n"
+        "3.1 Fees are due within 30 days of invoice date.\n"
+        "3.2 Late payments shall accrue interest at 4% above the base rate.\n"
+    ),
+    jurisdiction=Jurisdiction.UK,
+    document_type=DocumentType.SERVICE_AGREEMENT,
+    source="test.txt",
+)
+
+
+class TestLexiChunkStrategy:
+    def test_returns_chunkset(self) -> None:
+        strategy = LexiChunkStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        assert cs.count >= 1
+        assert cs.document_id == "test_doc"
+        assert cs.strategy == StrategyName.LEXICHUNK
+
+    def test_chunks_have_correct_strategy(self) -> None:
+        strategy = LexiChunkStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        for chunk in cs.chunks:
+            assert chunk.strategy == StrategyName.LEXICHUNK
+
+    def test_chunk_ids_follow_convention(self) -> None:
+        strategy = LexiChunkStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        for i, chunk in enumerate(cs.chunks):
+            assert chunk.id == f"lexichunk_test_doc_{i}"
+
+    def test_has_metadata(self) -> None:
+        strategy = LexiChunkStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        # At least some chunks should have metadata
+        has_metadata = any(len(c.metadata) > 0 for c in cs.chunks)
+        assert has_metadata
+
+    def test_elapsed_seconds_positive(self) -> None:
+        strategy = LexiChunkStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        assert cs.elapsed_seconds > 0
+
+
+class TestRCTSStrategy:
+    def test_returns_chunkset(self) -> None:
+        strategy = RCTSStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        assert cs.count >= 1
+        assert cs.document_id == "test_doc"
+        assert cs.strategy == StrategyName.RCTS
+
+    def test_chunks_roughly_configured_size(self) -> None:
+        strategy = RCTSStrategy(chunk_size=200)
+        cs = strategy.chunk(TINY_DOC)
+        for chunk in cs.chunks:
+            # Allow some tolerance due to splitting logic
+            assert chunk.char_count <= 250
+
+    def test_chunk_ids_follow_convention(self) -> None:
+        strategy = RCTSStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        for i, chunk in enumerate(cs.chunks):
+            assert chunk.id == f"rcts_test_doc_{i}"
+
+
+class TestSentenceSplitStrategy:
+    def test_returns_chunkset(self) -> None:
+        strategy = SentenceSplitStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        assert cs.count >= 1
+        assert cs.document_id == "test_doc"
+        assert cs.strategy == StrategyName.SENTENCE_SPLIT
+
+    def test_min_chunk_chars_respected(self) -> None:
+        strategy = SentenceSplitStrategy(min_chunk_chars=50)
+        cs = strategy.chunk(TINY_DOC)
+        # All chunks except possibly the last should be >= min_chunk_chars
+        for chunk in cs.chunks[:-1]:
+            assert chunk.char_count >= 50
+
+
+class TestFixedSizeStrategy:
+    def test_returns_chunkset(self) -> None:
+        strategy = FixedSizeStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        assert cs.count >= 1
+        assert cs.document_id == "test_doc"
+        assert cs.strategy == StrategyName.FIXED_SIZE
+
+    def test_chunks_at_most_configured_size(self) -> None:
+        strategy = FixedSizeStrategy(chunk_size=512)
+        cs = strategy.chunk(TINY_DOC)
+        for chunk in cs.chunks:
+            assert chunk.char_count <= 512
+
+    def test_chunk_ids_follow_convention(self) -> None:
+        strategy = FixedSizeStrategy()
+        cs = strategy.chunk(TINY_DOC)
+        for i, chunk in enumerate(cs.chunks):
+            assert chunk.id == f"fixed_size_test_doc_{i}"
+
+
+class TestStrategyRegistry:
+    def test_get_all_strategies_returns_four(self) -> None:
+        strategies = get_all_strategies()
+        assert len(strategies) == 4
+
+    def test_get_all_strategy_names(self) -> None:
+        strategies = get_all_strategies()
+        names = {s.name for s in strategies}
+        assert names == {
+            StrategyName.LEXICHUNK,
+            StrategyName.RCTS,
+            StrategyName.SENTENCE_SPLIT,
+            StrategyName.FIXED_SIZE,
+        }
+
+    def test_get_strategy_by_name(self) -> None:
+        strategy = get_strategy(StrategyName.LEXICHUNK)
+        assert strategy.name == StrategyName.LEXICHUNK
+
+    def test_get_unknown_strategy_raises(self) -> None:
+        with pytest.raises(ValueError, match="Unknown strategy"):
+            get_strategy(StrategyName.LEXICHUNK_CONTEXTUAL)
+
+
+class TestChunkingPipeline:
+    def test_run_returns_one_result_per_strategy(self) -> None:
+        strategies = get_all_strategies()
+        pipeline = ChunkingPipeline(strategies)
+        results = pipeline.run([TINY_DOC])
+        assert len(results) == 4
+
+    def test_each_result_has_correct_strategy(self) -> None:
+        strategies = get_all_strategies()
+        pipeline = ChunkingPipeline(strategies)
+        results = pipeline.run([TINY_DOC])
+        result_names = {r.strategy for r in results}
+        assert StrategyName.LEXICHUNK in result_names
+        assert StrategyName.RCTS in result_names
+
+    def test_run_single(self) -> None:
+        strategies = get_all_strategies()
+        pipeline = ChunkingPipeline(strategies)
+        result = pipeline.run_single(StrategyName.RCTS, [TINY_DOC])
+        assert result.strategy == StrategyName.RCTS
+        assert len(result.chunk_sets) == 1
+
+    def test_run_single_unknown_raises(self) -> None:
+        strategies = get_all_strategies()
+        pipeline = ChunkingPipeline(strategies)
+        with pytest.raises(ValueError, match="not found"):
+            pipeline.run_single(StrategyName.LEXICHUNK_CONTEXTUAL, [TINY_DOC])
+
+    def test_empty_strategies_raises(self) -> None:
+        with pytest.raises(ValueError, match="At least one"):
+            ChunkingPipeline([])
+
+    def test_integration_with_fixtures(self) -> None:
+        """Run all strategies on all real fixture documents."""
+        fm = FixtureManager()
+        docs = fm.load_all()
+        strategies = get_all_strategies()
+        pipeline = ChunkingPipeline(strategies)
+        results = pipeline.run(docs)
+
+        assert len(results) == 4
+        for result in results:
+            assert len(result.chunk_sets) == 5
+            for cs in result.chunk_sets:
+                assert cs.count > 0
+                assert cs.elapsed_seconds > 0
