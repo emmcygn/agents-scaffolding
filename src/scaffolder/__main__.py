@@ -6,7 +6,6 @@ import argparse
 import datetime
 import logging
 import os
-import sys
 from pathlib import Path
 
 from scaffolder.chunking import ChunkingPipeline, get_all_strategies
@@ -59,8 +58,7 @@ def main() -> None:
     elif args.command == "benchmark-embed":
         run_retrieval_benchmark(args)
     elif args.command == "report":
-        print("HTML report not yet implemented (Day 14).")
-        sys.exit(1)
+        run_report(args)
 
 
 def run_structural_benchmark(args: argparse.Namespace) -> None:
@@ -189,6 +187,131 @@ def run_retrieval_benchmark(args: argparse.Namespace) -> None:
         json_path = args.output_dir / "full_benchmark.json"
         export_json(result, json_path)
         print(f"\nJSON exported to: {json_path}")
+
+
+def run_report(args: argparse.Namespace) -> None:
+    """Generate HTML report from existing benchmark results or a fresh run."""
+    from scaffolder.reporting.html import render_html_report
+    from scaffolder.reporting.json_export import load_json
+
+    output_dir = args.output_dir
+
+    # Try to load existing results
+    json_path = output_dir / "full_benchmark.json"
+    if not json_path.exists():
+        json_path = output_dir / "structural_benchmark.json"
+
+    if json_path.exists():
+        logger.info("Loading results from %s", json_path)
+        data = load_json(json_path)
+        result = _reconstruct_benchmark_result(data)
+    else:
+        logger.info("No existing results found, running fresh structural benchmark.")
+        fm = FixtureManager()
+        documents = fm.load_all()
+        strategies = get_all_strategies()
+        pipeline = ChunkingPipeline(strategies)
+        strategy_results = pipeline.run(documents)
+
+        result = BenchmarkResult(
+            timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
+            strategies=[sr.strategy for sr in strategy_results],
+            documents=[d.id for d in documents],
+            strategy_results=strategy_results,
+        )
+        for sr in strategy_results:
+            for cs in sr.chunk_sets:
+                doc = fm.get_by_id(cs.document_id)
+                sm = compute_structural_metrics(cs, doc)
+                result.structural_metrics.append(sm)
+
+    html_path = output_dir / "report.html"
+    render_html_report(result, html_path)
+    print(f"HTML report generated: {html_path}")
+
+
+def _reconstruct_benchmark_result(data: dict) -> BenchmarkResult:  # type: ignore[type-arg]
+    """Reconstruct a BenchmarkResult from JSON data."""
+    import contextlib
+
+    from scaffolder.models import (
+        EmbeddingModelName,
+        RetrievalMetrics,
+        SignificanceResult,
+        StrategyName,
+        StructuralMetrics,
+    )
+
+    result = BenchmarkResult(
+        timestamp=data.get("timestamp", ""),
+    )
+
+    for s in data.get("strategies", []):
+        with contextlib.suppress(ValueError):
+            result.strategies.append(StrategyName(s))
+
+    result.documents = data.get("documents", [])
+
+    for m in data.get("models", []):
+        with contextlib.suppress(ValueError):
+            result.models.append(EmbeddingModelName(m))
+
+    for sm_data in data.get("structural_metrics", []):
+        with contextlib.suppress(KeyError, ValueError):
+            result.structural_metrics.append(
+                StructuralMetrics(
+                    strategy=StrategyName(sm_data["strategy"]),
+                    document_id=sm_data["document_id"],
+                    clause_fragmentation_rate=sm_data["clause_fragmentation_rate"],
+                    definition_preservation_rate=sm_data["definition_preservation_rate"],
+                    cross_ref_resolution_rate=sm_data["cross_ref_resolution_rate"],
+                    hierarchy_depth_retained=sm_data["hierarchy_depth_retained"],
+                    chunk_size_cv=sm_data["chunk_size_cv"],
+                    chunk_count=sm_data["chunk_count"],
+                    avg_chunk_chars=sm_data["avg_chunk_chars"],
+                )
+            )
+
+    for rm_data in data.get("retrieval_metrics", []):
+        with contextlib.suppress(KeyError, ValueError):
+            result.retrieval_metrics.append(
+                RetrievalMetrics(
+                    query_id=rm_data["query_id"],
+                    strategy=StrategyName(rm_data["strategy"]),
+                    embedding_model=EmbeddingModelName(rm_data["embedding_model"]),
+                    precision_at_1=rm_data["precision_at_1"],
+                    precision_at_3=rm_data["precision_at_3"],
+                    precision_at_5=rm_data["precision_at_5"],
+                    precision_at_10=rm_data["precision_at_10"],
+                    recall_at_1=rm_data["recall_at_1"],
+                    recall_at_3=rm_data["recall_at_3"],
+                    recall_at_5=rm_data["recall_at_5"],
+                    recall_at_10=rm_data["recall_at_10"],
+                    mrr=rm_data["mrr"],
+                    ndcg_at_10=rm_data["ndcg_at_10"],
+                    drm_hit=rm_data["drm_hit"],
+                )
+            )
+
+    for sr_data in data.get("significance_results", []):
+        with contextlib.suppress(KeyError, ValueError):
+            result.significance_results.append(
+                SignificanceResult(
+                    metric_name=sr_data["metric_name"],
+                    strategy_a=StrategyName(sr_data["strategy_a"]),
+                    strategy_b=StrategyName(sr_data["strategy_b"]),
+                    mean_a=sr_data["mean_a"],
+                    mean_b=sr_data["mean_b"],
+                    improvement_pct=sr_data["improvement_pct"],
+                    t_statistic=sr_data["t_statistic"],
+                    p_value=sr_data["p_value"],
+                    significant=sr_data["significant"],
+                    effect_size=sr_data["effect_size"],
+                    n_queries=sr_data["n_queries"],
+                )
+            )
+
+    return result
 
 
 if __name__ == "__main__":
