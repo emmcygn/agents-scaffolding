@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scaffolder"
-version = "0.1.0"
+version = "1.0.0"
 description = "Evaluation harness proving LexiChunk improves RAG retrieval quality over general-purpose chunkers"
 readme = "README.md"
 license = {text = "MIT"}
@@ -13,7 +13,7 @@ authors = [
     {name = "SDK Scaffolder Team"}
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -24,13 +24,13 @@ classifiers = [
 ]
 
 dependencies = [
-    "lexichunk>=0.1.0",
-    "langchain-text-splitters>=0.2.0",
-    "rich>=13.0",
-    "pyyaml>=6.0",
-    "numpy>=1.24",
-    "scipy>=1.10",
-    "jinja2>=3.1",
+    "lexichunk>=0.1.0,<1.0",
+    "langchain-text-splitters>=0.2.0,<1.0",
+    "rich>=13.0,<14.0",
+    "pyyaml>=6.0,<7.0",
+    "numpy>=1.24,<2.0",
+    "scipy>=1.10,<2.0",
+    "jinja2>=3.1,<4.0",
 ]
 
 [project.optional-dependencies]

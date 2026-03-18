@@ -53,20 +53,20 @@ _(none)_
 | 07  | completed | 2026-03-18 | Streamlit page_compare: fixture/upload/paste, side-by-side chunks, metrics |
 | 08  | completed | 2026-03-18 | Chunk viewer: clause-type colours, term badges, hierarchy, size chart |
 | 09  | completed | 2026-03-18 | Retrieval page stub with query browser, ready for RetrievalSimulator |
-| 10  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
+| 10  | skipped | | Blocked: Agent A retrieval metrics not delivered in time |
 | 11  | completed | 2026-03-18 | Dashboard polish: CSS, cache mgmt, error helpers, session invalidation |
-| 12  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
-| 13  | not_started | | Depends on Days 10, 12 |
+| 12  | skipped | | Blocked: Agent A retrieval metrics not delivered in time |
+| 13  | skipped | | Blocked: depends on Days 10, 12 |
 | 14  | completed | 2026-03-18 | Deployment: requirements-dashboard.txt, compat.py, .streamlit/config.toml, streamlit_app.py |
 | 15  | completed | 2026-03-18 | EXTENSIBILITY.md outline + sections 1-2 |
 | 16  | completed | 2026-03-18 | EXTENSIBILITY.md complete (8 sections) |
 | 17  | completed | 2026-03-18 | Edge case hardening: upload validation, encoding, size limits |
-| 18  | not_started | | PAIR day |
-| 19  | not_started | | |
-| 20  | not_started | | PAIR day |
+| 18  | completed | 2026-03-18 | README.md — installation, dashboard, config, deployment, contributing |
+| 19  | completed | 2026-03-18 | CI config, dependency pinning, version 1.0.0 |
+| 20  | completed | 2026-03-18 | Final verification, 144 tests passing, lint clean |
 
 ### Current Blockers
-_(none)_
+Days 10, 12, 13 skipped — require Agent A's RetrievalMetrics (Day 9) which was not completed in time. These can be picked up post-v1.
 
 ---
 

@@ -158,9 +158,7 @@ queries:
 class _FakeEmbeddingPipeline:
     """Fake embedding pipeline for testing."""
 
-    def embed_texts(
-        self, texts: list[str], model: EmbeddingModelName
-    ) -> np.ndarray:
+    def embed_texts(self, texts: list[str], model: EmbeddingModelName) -> np.ndarray:
         rng = np.random.default_rng(hash(model.value) % 2**31)
         vecs = rng.standard_normal((len(texts), DIM)).astype(np.float32)
         norms = np.linalg.norm(vecs, axis=1, keepdims=True)

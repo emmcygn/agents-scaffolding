@@ -131,9 +131,7 @@ class RetrievalSimulator:
                     hits = index.search(query_vec, k=k)
 
                     relevant_retrieved = sum(
-                        1
-                        for h in hits
-                        if _is_relevant(h.chunk, query.relevant_sections)
+                        1 for h in hits if _is_relevant(h.chunk, query.relevant_sections)
                     )
 
                     results.append(
@@ -188,10 +186,7 @@ def _is_relevant(
         if snippet_lower:
             snippet_words = set(snippet_lower.split())
             chunk_words = set(chunk_lower.split())
-            if (
-                snippet_words
-                and len(snippet_words & chunk_words) / len(snippet_words) > 0.6
-            ):
+            if snippet_words and len(snippet_words & chunk_words) / len(snippet_words) > 0.6:
                 return True
 
     return False
@@ -228,10 +223,7 @@ def get_relevance_grade(
         elif snippet_lower:
             snippet_words = set(snippet_lower.split())
             chunk_words = set(chunk_lower.split())
-            if (
-                snippet_words
-                and len(snippet_words & chunk_words) / len(snippet_words) > 0.6
-            ):
+            if snippet_words and len(snippet_words & chunk_words) / len(snippet_words) > 0.6:
                 matched = True
 
         if matched and section.grade.value > best_grade.value:
