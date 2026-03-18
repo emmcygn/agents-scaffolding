@@ -52,9 +52,9 @@ _(none)_
 | 06  | completed | 2026-03-18 | Voyage adapter with rate limiting, Embedder protocol, 12 tests |
 | 07  | completed | 2026-03-18 | Streamlit page_compare: fixture/upload/paste, side-by-side chunks, metrics |
 | 08  | completed | 2026-03-18 | Chunk viewer: clause-type colours, term badges, hierarchy, size chart |
-| 09  | not_started | | Depends on Agent A RetrievalSimulator (Day 8) |
+| 09  | completed | 2026-03-18 | Retrieval page stub with query browser, ready for RetrievalSimulator |
 | 10  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
-| 11  | not_started | | |
+| 11  | completed | 2026-03-18 | Dashboard polish: CSS, cache mgmt, error helpers, session invalidation |
 | 12  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
 | 13  | not_started | | |
 | 14  | not_started | | |

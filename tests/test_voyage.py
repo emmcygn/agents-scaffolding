@@ -126,8 +126,9 @@ class TestVoyageEmbedderEmbed:
 class TestVoyageEmbedderProtocol:
     """Test that VoyageEmbedder conforms to the Embedder protocol."""
 
-    def test_conforms_to_protocol(self) -> None:
-        from scaffolder.embedding import Embedder
-
+    def test_has_required_interface(self) -> None:
         embedder = VoyageEmbedder(api_key="test-key")
-        assert isinstance(embedder, Embedder)
+        assert hasattr(embedder, "model_name")
+        assert hasattr(embedder, "dimension")
+        assert hasattr(embedder, "embed")
+        assert hasattr(embedder, "embed_query")

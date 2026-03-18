@@ -2,7 +2,31 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import streamlit as st
+
+
+def _invalidate_on_change(key: str, new_value: Any) -> bool:
+    """Track a value and return True if it changed, clearing relevant caches."""
+    prev_key = f"_prev_{key}"
+    prev = st.session_state.get(prev_key)
+
+    if prev != new_value:
+        st.session_state[prev_key] = new_value
+        if key == "global_model":
+            keys_to_clear = [k for k in list(st.session_state) if k.startswith("index_")]
+            for k in keys_to_clear:
+                del st.session_state[k]
+            return True
+        if key == "strategies":
+            keys_to_clear = [
+                k for k in list(st.session_state) if k.startswith("index_") or k.startswith("ret_")
+            ]
+            for k in keys_to_clear:
+                del st.session_state[k]
+            return True
+    return False
 
 
 def main() -> None:
@@ -11,6 +35,21 @@ def main() -> None:
         page_title="LexiChunk Scaffolder",
         layout="wide",
         initial_sidebar_state="expanded",
+    )
+
+    # Custom CSS for polish
+    st.markdown(
+        """
+    <style>
+        @media (max-width: 768px) {
+            .block-container { padding-left: 1rem; padding-right: 1rem; }
+        }
+        .streamlit-expanderHeader { font-size: 0.95em; }
+        [data-testid="stMetricValue"] { font-size: 1.5rem; }
+        .stDataFrame { font-size: 0.9em; }
+    </style>
+    """,
+        unsafe_allow_html=True,
     )
 
     # Sidebar navigation
@@ -40,6 +79,24 @@ def main() -> None:
         default=["lexichunk", "langchain_rcts"],
     )
     st.session_state.config["strategies"] = selected_strategies
+    _invalidate_on_change("strategies", tuple(selected_strategies))
+
+    # Cache management section
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("**Cache**")
+
+    index_count = sum(1 for k in st.session_state if k.startswith("index_"))
+    chunk_count = sum(1 for k in st.session_state if k.startswith("chunks_"))
+    st.sidebar.caption(f"Cached: {index_count} indexes, {chunk_count} chunk sets")
+
+    if st.sidebar.button("Clear All Caches", type="secondary"):
+        keys_to_clear = [
+            k for k in list(st.session_state) if k.startswith(("index_", "chunks_", "ret_"))
+        ]
+        for k in keys_to_clear:
+            del st.session_state[k]
+        st.sidebar.success("Cache cleared!")
+        st.rerun()
 
     # Route to pages
     if page == "Compare Chunks":

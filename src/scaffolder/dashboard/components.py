@@ -223,3 +223,29 @@ def render_metric_card(
         st.metric(label, formatted, delta=f"{delta:+{fmt}}")
     else:
         st.metric(label, formatted)
+
+
+def render_error(title: str, detail: str, suggestion: str = "") -> None:
+    """Render a structured error message with optional suggestion."""
+    st.error(f"**{title}**")
+    st.markdown(f"> {detail}")
+    if suggestion:
+        st.info(f"**Suggestion:** {suggestion}")
+
+
+def render_dependency_error(package: str, extra: str) -> None:
+    """Render a helpful error for missing optional dependencies."""
+    render_error(
+        title=f"Missing dependency: {package}",
+        detail=f"The `{package}` package is required for this feature but not installed.",
+        suggestion=f'Install with: `pip install "scaffolder[{extra}]"`',
+    )
+
+
+def render_api_key_error(service: str, env_var: str, url: str) -> None:
+    """Render a helpful error for missing API keys."""
+    render_error(
+        title=f"{service} API key not found",
+        detail=f"The environment variable `{env_var}` is not set.",
+        suggestion=f"Get a key at {url} and set `export {env_var}=your-key`",
+    )
