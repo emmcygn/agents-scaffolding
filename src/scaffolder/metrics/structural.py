@@ -143,6 +143,9 @@ def clause_fragmentation_rate(chunk_set: ChunkSet, document: Document) -> float:
     Returns:
         0.0 = no fragmentation (best), 1.0 = all fragmented (worst).
     """
+    if not chunk_set.chunks:
+        return 0.0  # no chunks = cannot evaluate fragmentation
+
     gt = get_ground_truth(document)
     if not gt.clauses:
         return 0.0

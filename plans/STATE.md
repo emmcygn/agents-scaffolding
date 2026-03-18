@@ -30,7 +30,7 @@ Both agents read and write this file. It is the single source of truth for progr
 | 14  | completed | 2026-03-18 | Wire make report CLI, JSON reconstruction, retrieval/significance/methodology in template |
 | 15  | completed | 2026-03-18 | docs/metrics.md (10 metrics + formulas), sanity tests (11 tests, all passing) |
 | 16  | completed | 2026-03-18 | Test coverage to 86%: CLI/JSON/HTML reporting tests, integration tests, __main__ tests |
-| 17  | not_started | | |
+| 17  | completed | 2026-03-18 | Edge case handling (empty/single/flat docs), 17 tests, 253 total passing |
 | 18  | completed | 2026-03-18 | PAIR: README benchmark results, architecture diagram, actual metrics |
 | 19  | completed | 2026-03-18 | Code review sweep: lint clean, 189 tests passing, no TODOs |
 | 20  | completed | 2026-03-18 | PAIR: Final verification, all tests pass, lint clean |
