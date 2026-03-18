@@ -66,6 +66,25 @@ src/scaffolder/
 
 This repo is built by **two AI agents working in parallel** with self-contained daily plans. All implementation is agent-first — Claude Code IS the engineering team.
 
+**Full orchestration protocol:** `plans/ORCHESTRATOR.md`
+**Progress tracker:** `plans/STATE.md` (single source of truth for what's done)
+**Inter-agent comms:** `plans/HANDOFF.md` (append-only log of delivered work)
+**Shared lessons:** `tasks/lessons.md` (corrections and patterns)
+
+### Execution Modes
+
+**Option 1 — Two terminals (parallel):**
+Open two Claude Code sessions. Tell Terminal 1 "You are Agent A" and Terminal 2 "You are Agent B". Each reads `plans/ORCHESTRATOR.md` and runs autonomously through all 20 days. They coordinate via STATE.md and HANDOFF.md on disk.
+
+**Option 2 — One terminal with subagents (orchestrated):**
+One Claude Code session acts as orchestrator, spawning Agent A and Agent B as background subagents (via the Agent tool with `run_in_background: true`). The orchestrator:
+1. Runs Day 1 as a pairing day (both agents, same context)
+2. Launches Agent A Day 2 and Agent B Day 2 as parallel background agents
+3. Waits for completion notifications, checks STATE.md
+4. Resolves dependencies (if Agent B Day 7 needs Agent A Day 3, waits for A to finish)
+5. Continues launching the next day for each agent as they complete
+6. Handles pairing days (18, 20) in the main context
+
 ### Agent A — Pipeline & Eval
 **Owns:** FixtureManager, ChunkingPipeline, EmbeddingPipeline (local), FAISS indexing, RetrievalSimulator, all metrics, statistical testing, CLI + JSON output, HTML report, tests.
 **Plans:** `plans/agent-a/day-01.md` through `day-20.md`
@@ -76,11 +95,17 @@ This repo is built by **two AI agents working in parallel** with self-contained 
 
 ### How to Execute a Day
 
-1. Read the day file (e.g., `plans/agent-a/day-07.md`) — it is fully self-contained
-2. Check **Prerequisites** — verify the files/modules listed actually exist
-3. Work through the **Checklist** sequentially, using **Implementation Details** for specifics
-4. Validate against **Acceptance Criteria** (commands to run, expected results)
-5. Read **Handoff Notes** to understand what the other agent or next day depends on
+1. Read `plans/STATE.md` → find your next `not_started` day
+2. Check dependencies — is the blocking day marked `completed`?
+3. Read the day file (e.g., `plans/agent-a/day-07.md`) — it is fully self-contained
+4. Check **Prerequisites** — verify the files/modules listed actually exist
+5. Work through the **Checklist** sequentially, using **Implementation Details** for specifics
+6. Validate against **Acceptance Criteria** (commands to run, expected results)
+7. Run `make lint && make test` — fix any failures before proceeding
+8. Update `plans/STATE.md` — mark day as `completed` with timestamp
+9. Write `plans/HANDOFF.md` entry if the other agent depends on today's output
+10. Commit: `Agent {A|B} Day {XX}: {title}`
+11. Loop → back to step 1
 
 ### Agent Coordination Rules
 
@@ -89,16 +114,7 @@ This repo is built by **two AI agents working in parallel** with self-contained 
 - **Agent A is the critical path** for pipeline components (chunking → embedding → retrieval → metrics). Agent B can build Streamlit against the model contracts before Agent A's implementations land.
 - **Agent B can work ahead** on query annotations, config, Streamlit layout, and EXTENSIBILITY.md at any time — these have no upstream dependency after Day 1.
 - **Never modify the other agent's owned files** without noting it in handoff. If you need a change in a file you don't own, describe what you need in handoff notes.
-
-### Agent Self-Verification
-
-After completing any day's work:
-```bash
-make lint              # ruff + mypy must pass
-make test              # all tests green, coverage holds
-make benchmark         # structural pipeline still works (fast check)
-```
-If any of these fail, fix before moving to the next day. Do not accumulate broken state.
+- **Session recovery:** If context is lost, re-read `plans/STATE.md` → find last completed day → resume from next. Read `plans/HANDOFF.md` to catch up on what the other agent delivered.
 
 ---
 
