@@ -14,7 +14,7 @@ Both agents read and write this file. It is the single source of truth for progr
 
 | Day | Status | Completed | Notes |
 |-----|--------|-----------|-------|
-| 01  | not_started | | PAIR day — wait for both agents |
+| 01  | completed | 2026-03-18 | PAIR day — models.py, protocol interfaces, directory structure, all __init__.py |
 | 02  | not_started | | |
 | 03  | not_started | | |
 | 04  | not_started | | |
@@ -44,7 +44,7 @@ _(none)_
 
 | Day | Status | Completed | Notes |
 |-----|--------|-----------|-------|
-| 01  | not_started | | PAIR day — wait for both agents |
+| 01  | completed | 2026-03-18 | PAIR day — pyproject.toml, config.py, Makefile, .gitignore, all __init__.py files |
 | 02  | not_started | | |
 | 03  | not_started | | |
 | 04  | not_started | | |
@@ -76,6 +76,6 @@ Track key files that both agents depend on. When these change, note it here.
 
 | File | Last Modified By | Day | What Changed |
 |------|-----------------|-----|--------------|
-| `src/scaffolder/models.py` | — | — | — |
-| `src/scaffolder/config.py` | — | — | — |
+| `src/scaffolder/models.py` | Agent A | 01 | Created all data contracts, enums, protocols (ChunkingStrategy, Embedder) |
+| `src/scaffolder/config.py` | Agent B | 01 | Created BenchmarkConfig dataclass with from_yaml, from_env, resolve_paths |
 | `queries/*.yaml` | — | — | — |
