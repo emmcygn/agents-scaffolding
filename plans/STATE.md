@@ -50,7 +50,7 @@ _(none)_
 | 04  | completed | 2026-03-18 | 22 queries across all 5 fixtures, CLI reporter, test_queries.py |
 | 05  | completed | 2026-03-18 | JSON export, CLI polish, Streamlit skeleton (3 pages + components) |
 | 06  | completed | 2026-03-18 | Voyage adapter with rate limiting, Embedder protocol, 12 tests |
-| 07  | not_started | | Depends on Agent A ChunkingPipeline (Day 3) |
+| 07  | completed | 2026-03-18 | Streamlit page_compare: fixture/upload/paste, side-by-side chunks, metrics |
 | 08  | not_started | | |
 | 09  | not_started | | Depends on Agent A RetrievalSimulator (Day 8) |
 | 10  | not_started | | Depends on Agent A retrieval metrics (Day 9) |
