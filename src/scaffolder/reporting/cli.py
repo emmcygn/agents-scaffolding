@@ -9,7 +9,12 @@ from rich.table import Table
 from rich.text import Text
 
 if TYPE_CHECKING:
-    from scaffolder.models import BenchmarkResult, StructuralMetrics
+    from scaffolder.models import (
+        BenchmarkResult,
+        RetrievalMetrics,
+        SignificanceResult,
+        StructuralMetrics,
+    )
 
 
 def _best_worst(values: list[float], higher_is_better: bool) -> tuple[float, float]:
@@ -163,18 +168,173 @@ def render_aggregate_summary(
     console.print()
 
 
+def _get_significance_marker(
+    strategy: str,
+    metric_attr: str,
+    significance_results: list[SignificanceResult],
+) -> str:
+    """Get significance marker for a strategy/metric pair.
+
+    Returns "**" if p < 0.01, "*" if p < 0.05, "" otherwise.
+    Compares the given strategy against LexiChunk (the reference).
+    """
+    if not significance_results:
+        return ""
+
+    # No marker for the reference strategy
+    if strategy == "lexichunk":
+        return ""
+
+    for sr in significance_results:
+        if sr.strategy_b.value == strategy and sr.metric_name == metric_attr:
+            if sr.p_value < 0.01:
+                return "**"
+            if sr.p_value < 0.05:
+                return "*"
+    return ""
+
+
+def render_retrieval_table(
+    metrics: list[RetrievalMetrics],
+    significance_results: list[SignificanceResult] | None = None,
+    console: Console | None = None,
+) -> None:
+    """Render retrieval metrics as a colour-coded rich table.
+
+    Shows per-strategy aggregate retrieval metrics (averaged across all queries).
+    Adds significance markers when statistical tests are provided.
+
+    Significance markers:
+    - * p < 0.05 (significant)
+    - ** p < 0.01 (highly significant)
+    """
+    if console is None:
+        console = Console()
+
+    if not metrics:
+        console.print("[yellow]No retrieval results to display (run with --embed).[/yellow]")
+        return
+
+    sig = significance_results or []
+
+    # Group by embedding model
+    models = sorted({m.embedding_model.value for m in metrics})
+
+    for model in models:
+        model_metrics = [m for m in metrics if m.embedding_model.value == model]
+
+        # Group by strategy and compute averages
+        strategies = sorted({m.strategy.value for m in model_metrics})
+        strategy_avgs: dict[str, dict[str, float]] = {}
+
+        for strategy in strategies:
+            strat_metrics = [m for m in model_metrics if m.strategy.value == strategy]
+            n = len(strat_metrics)
+            if n == 0:
+                continue
+
+            strategy_avgs[strategy] = {
+                "P@1": sum(m.precision_at_1 for m in strat_metrics) / n,
+                "P@3": sum(m.precision_at_3 for m in strat_metrics) / n,
+                "P@5": sum(m.precision_at_5 for m in strat_metrics) / n,
+                "P@10": sum(m.precision_at_10 for m in strat_metrics) / n,
+                "MRR": sum(m.mrr for m in strat_metrics) / n,
+                "NDCG@10": sum(m.ndcg_at_10 for m in strat_metrics) / n,
+                "DRM%": sum(1 for m in strat_metrics if m.drm_hit) / n,
+                "n_queries": float(n),
+            }
+
+        # Build table
+        table = Table(
+            title=f"Retrieval Metrics — {model}",
+            show_header=True,
+            header_style="bold cyan",
+        )
+        table.add_column("Strategy", style="bold")
+        table.add_column("P@1", justify="right")
+        table.add_column("P@3", justify="right")
+        table.add_column("P@5", justify="right")
+        table.add_column("P@10", justify="right")
+        table.add_column("MRR", justify="right")
+        table.add_column("NDCG@10", justify="right")
+        table.add_column("DRM%", justify="right")
+        table.add_column("Queries", justify="right")
+
+        # Metric attr map for significance lookups
+        metric_attr_map = {
+            "P@1": "precision_at_1",
+            "P@3": "precision_at_3",
+            "P@5": "precision_at_5",
+            "P@10": "precision_at_10",
+            "MRR": "mrr",
+            "NDCG@10": "ndcg_at_10",
+        }
+
+        # Compute best/worst for colour coding
+        metric_keys = ["P@1", "P@3", "P@5", "P@10", "MRR", "NDCG@10"]
+        best_worst: dict[str, tuple[float, float]] = {}
+        for mk in metric_keys:
+            vals = [a[mk] for a in strategy_avgs.values()]
+            best_worst[mk] = _best_worst(vals, higher_is_better=True)
+
+        # DRM is lower-is-better
+        drm_vals = [a["DRM%"] for a in strategy_avgs.values()]
+        best_worst["DRM%"] = _best_worst(drm_vals, higher_is_better=False)
+
+        for strategy in strategies:
+            avgs = strategy_avgs.get(strategy)
+            if avgs is None:
+                continue
+
+            row: list[Text | str] = [strategy]
+            for mk in metric_keys:
+                value = avgs[mk]
+                best, worst = best_worst[mk]
+                text = _color_value(value, best, worst)
+
+                # Add significance marker
+                marker = _get_significance_marker(strategy, metric_attr_map[mk], sig)
+                if marker:
+                    text.append(f" {marker}", style="bold yellow")
+                row.append(text)
+
+            # DRM rate (lower is better)
+            drm_best, drm_worst = best_worst["DRM%"]
+            drm_text = _color_value(avgs["DRM%"], drm_best, drm_worst)
+            row.append(drm_text)
+
+            row.append(str(int(avgs["n_queries"])))
+            table.add_row(*row)
+
+        console.print(table)
+        console.print()
+
+
 def render_benchmark(
     result: BenchmarkResult,
     console: Console | None = None,
 ) -> None:
-    """Full CLI benchmark output: header + structural + summary.
-
-    This is the main entry point for CLI rendering. Day 10 adds
-    retrieval metrics rendering between structural and summary.
-    """
+    """Full CLI benchmark output: header + structural + retrieval + summary."""
     if console is None:
         console = Console()
 
     render_summary_header(result, console)
     render_structural_table(result.structural_metrics, console)
+
+    # Retrieval metrics (only if embedding was run)
+    if result.retrieval_metrics:
+        render_retrieval_table(
+            result.retrieval_metrics,
+            significance_results=result.significance_results,
+            console=console,
+        )
+
+        # Significance legend
+        if result.significance_results:
+            console.print(
+                "[dim]Significance: * p<0.05, ** p<0.01 "
+                "(paired t-test, LexiChunk vs baseline)[/dim]"
+            )
+            console.print()
+
     render_aggregate_summary(result, console)

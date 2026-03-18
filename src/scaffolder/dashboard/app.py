@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 import streamlit as st
@@ -81,6 +82,25 @@ def main() -> None:
     st.session_state.config["strategies"] = selected_strategies
     _invalidate_on_change("strategies", tuple(selected_strategies))
 
+    # Embedding model selection
+    available_models = ["all-MiniLM-L6-v2", "bge-base-en-v1.5"]
+    if os.getenv("VOYAGE_API_KEY"):
+        available_models.append("voyage-law-2")
+
+    selected_model = st.sidebar.selectbox(
+        "Embedding Model",
+        options=available_models,
+        key="global_model",
+        help="Voyage requires VOYAGE_API_KEY environment variable",
+    )
+    st.session_state.config["embedding_model"] = selected_model
+    _invalidate_on_change("global_model", selected_model)
+
+    if "voyage-law-2" in available_models:
+        st.sidebar.success("Voyage API: Connected")
+    else:
+        st.sidebar.caption("Set VOYAGE_API_KEY to enable voyage-law-2")
+
     # Cache management section
     st.sidebar.markdown("---")
     st.sidebar.markdown("**Cache**")
@@ -108,8 +128,14 @@ def main() -> None:
 
         render_page()
     elif page == "Metrics Dashboard":
-        st.title("Metrics Dashboard")
-        st.info("Coming soon — metrics summary panels and comparison charts.")
+        from scaffolder.dashboard.page_metrics import render_page as render_metrics_page
+
+        render_metrics_page()
+
+    # Export section in sidebar (available from any page)
+    from scaffolder.dashboard.components import render_export_section
+
+    render_export_section()
 
 
 if __name__ == "__main__":

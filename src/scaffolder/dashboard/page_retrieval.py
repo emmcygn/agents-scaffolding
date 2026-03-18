@@ -120,6 +120,9 @@ def render_page() -> None:
     st.subheader("Results")
     st.info("Results will appear here after retrieval pipeline is integrated.")
 
+    # --- Filtered Retrieval Demo ---
+    _render_filtered_retrieval(doc_id)
+
 
 def _render_query_browser() -> None:
     """Render a query browser showing annotated queries without retrieval."""
@@ -143,3 +146,103 @@ def _render_query_browser() -> None:
             st.markdown(f"**ID:** {q['id']}")
             st.markdown(f"**Failure mode:** {q['failure_mode']}")
             st.markdown(f"**Query:** {q['text']}")
+
+
+def _render_filtered_retrieval(doc_id: str) -> None:
+    """Render the filtered retrieval demo.
+
+    Shows that LexiChunk's clause_type metadata enables targeted retrieval
+    that baselines cannot perform.
+    """
+    st.markdown("---")
+    st.subheader("Filtered Retrieval (LexiChunk Exclusive)")
+    st.markdown(
+        "LexiChunk tags each chunk with a clause type, enabling **targeted retrieval** "
+        "that general-purpose chunkers cannot support. Select a clause type to find "
+        "all matching chunks across the document."
+    )
+
+    clause_types = [
+        "definitions",
+        "termination",
+        "payment",
+        "indemnification",
+        "limitation_of_liability",
+        "confidentiality",
+        "intellectual_property",
+        "data_protection",
+        "governing_law",
+        "dispute_resolution",
+        "force_majeure",
+        "warranties",
+        "obligations",
+        "notices",
+    ]
+
+    selected_type = st.selectbox(
+        "Clause type to find",
+        options=clause_types,
+        key="filter_clause_type",
+        help="Find all chunks classified as this clause type",
+    )
+
+    if st.button("Find Clauses", key="filter_search"):
+        chunk_set_key = f"chunks_{doc_id}_lexichunk"
+        chunk_set = st.session_state.get(chunk_set_key)
+
+        if chunk_set is None:
+            with st.spinner("Chunking with LexiChunk..."):
+                try:
+                    from scaffolder.chunking import get_strategy
+                    from scaffolder.fixtures import FixtureManager
+
+                    manager = FixtureManager()
+                    document = manager.load(doc_id)
+                    strategy = get_strategy("lexichunk")
+                    chunk_set = strategy.chunk(document)
+                    st.session_state[chunk_set_key] = chunk_set
+                except Exception as e:
+                    st.error(f"Failed to chunk document: {e}")
+                    return
+
+        matching = [c for c in chunk_set.chunks if c.metadata.get("clause_type") == selected_type]
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown(f"**LexiChunk: {len(matching)} matching chunks**")
+            if matching:
+                for i, chunk in enumerate(matching):
+                    confidence = float(chunk.metadata.get("confidence", 0))
+                    with st.expander(
+                        f"{selected_type} — Confidence: {confidence:.0%}",
+                        expanded=i < 3,
+                    ):
+                        hierarchy = chunk.metadata.get("hierarchy_path", "")
+                        if hierarchy:
+                            st.caption(f"Path: {hierarchy}")
+                        st.text(chunk.text[:800])
+            else:
+                st.info(f"No {selected_type} clauses found in this document.")
+
+        with col2:
+            st.markdown("**Baseline: Not possible**")
+            st.warning(
+                f"Baseline chunkers do not classify chunk types. "
+                f"There is no way to filter for '{selected_type}' clauses "
+                f"without LexiChunk's metadata. A keyword search for "
+                f"'{selected_type.replace('_', ' ')}' would miss clauses "
+                f"that don't contain the exact phrase."
+            )
+
+            baseline_key = f"chunks_{doc_id}_rcts"
+            baseline_set = st.session_state.get(baseline_key)
+            if baseline_set:
+                keyword = selected_type.replace("_", " ")
+                keyword_matches = [
+                    c for c in baseline_set.chunks if keyword.lower() in c.text.lower()
+                ]
+                st.caption(
+                    f"Naive keyword search for '{keyword}' in baseline chunks: "
+                    f"{len(keyword_matches)} matches (likely imprecise)"
+                )

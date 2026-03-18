@@ -53,10 +53,10 @@ _(none)_
 | 07  | completed | 2026-03-18 | Streamlit page_compare: fixture/upload/paste, side-by-side chunks, metrics |
 | 08  | completed | 2026-03-18 | Chunk viewer: clause-type colours, term badges, hierarchy, size chart |
 | 09  | completed | 2026-03-18 | Retrieval page stub with query browser, ready for RetrievalSimulator |
-| 10  | skipped | | Blocked: Agent A retrieval metrics not delivered in time |
+| 10  | completed | 2026-03-18 | CLI retrieval metrics tables with significance markers, Voyage toggle |
 | 11  | completed | 2026-03-18 | Dashboard polish: CSS, cache mgmt, error helpers, session invalidation |
-| 12  | skipped | | Blocked: Agent A retrieval metrics not delivered in time |
-| 13  | skipped | | Blocked: depends on Days 10, 12 |
+| 12  | completed | 2026-03-18 | Metrics dashboard: headline cards, structural/retrieval bar charts, heatmap |
+| 13  | completed | 2026-03-18 | Filtered retrieval demo + export functionality |
 | 14  | completed | 2026-03-18 | Deployment: requirements-dashboard.txt, compat.py, .streamlit/config.toml, streamlit_app.py |
 | 15  | completed | 2026-03-18 | EXTENSIBILITY.md outline + sections 1-2 |
 | 16  | completed | 2026-03-18 | EXTENSIBILITY.md complete (8 sections) |
@@ -66,7 +66,7 @@ _(none)_
 | 20  | completed | 2026-03-18 | Final verification, 144 tests passing, lint clean |
 
 ### Current Blockers
-Days 10, 12, 13 skipped — require Agent A's RetrievalMetrics (Day 9) which was not completed in time. These can be picked up post-v1.
+_(none — all 20 days completed)_
 
 ---
 

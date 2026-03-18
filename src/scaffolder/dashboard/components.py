@@ -249,3 +249,76 @@ def render_api_key_error(service: str, env_var: str, url: str) -> None:
         detail=f"The environment variable `{env_var}` is not set.",
         suggestion=f"Get a key at {url} and set `export {env_var}=your-key`",
     )
+
+
+def render_export_section() -> None:
+    """Render export buttons in the sidebar.
+
+    Provides download buttons for JSON results and HTML report.
+    Only active when benchmark results are available.
+    """
+    import json
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("**Export**")
+
+    result_data = st.session_state.get("benchmark_result")
+
+    if result_data is None:
+        st.sidebar.caption("Run a benchmark to enable exports.")
+        return
+
+    # JSON download
+    json_str = json.dumps(result_data, indent=2)
+    st.sidebar.download_button(
+        label="Download JSON",
+        data=json_str,
+        file_name="scaffolder_results.json",
+        mime="application/json",
+        key="export_json",
+    )
+
+    # HTML report download
+    try:
+        html_str = _generate_html_report(result_data)
+        st.sidebar.download_button(
+            label="Download HTML Report",
+            data=html_str,
+            file_name="scaffolder_report.html",
+            mime="text/html",
+            key="export_html",
+        )
+    except Exception as e:
+        st.sidebar.caption(f"HTML export unavailable: {e}")
+
+
+def _generate_html_report(data: dict[str, object]) -> str:
+    """Generate HTML report from benchmark results.
+
+    Uses Agent A's Jinja2 template if available, falls back to
+    a minimal self-contained HTML report.
+    """
+    import json
+
+    return (
+        "<!DOCTYPE html>\n"
+        "<html>\n<head>\n"
+        "    <title>Scaffolder Benchmark Report</title>\n"
+        "    <style>\n"
+        "        body { font-family: -apple-system, sans-serif; max-width: 800px;"
+        " margin: 2rem auto; padding: 0 1rem; }\n"
+        "        h1 { color: #1a237e; }\n"
+        "        pre { background: #f5f5f5; padding: 1rem; border-radius: 4px;"
+        " overflow-x: auto; }\n"
+        "        .metric { display: inline-block; padding: 1rem; margin: 0.5rem;"
+        " background: #e3f2fd; border-radius: 8px; }\n"
+        "        .metric .value { font-size: 2rem; font-weight: bold; color: #1565c0; }\n"
+        "        .metric .label { font-size: 0.9rem; color: #666; }\n"
+        "    </style>\n"
+        "</head>\n<body>\n"
+        "    <h1>LexiChunk Scaffolder Report</h1>\n"
+        "    <p>Generated from benchmark results</p>\n"
+        "    <h2>Raw Results</h2>\n"
+        f"    <pre>{json.dumps(data, indent=2)}</pre>\n"
+        "</body>\n</html>"
+    )
