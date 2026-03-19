@@ -6,7 +6,10 @@ import argparse
 import datetime
 import logging
 import os
+import random
 from pathlib import Path
+
+import numpy as np
 
 from scaffolder.chunking import ChunkingPipeline, get_all_strategies
 from scaffolder.fixtures import FixtureManager
@@ -16,6 +19,22 @@ from scaffolder.reporting.cli import render_benchmark
 from scaffolder.reporting.json_export import export_json
 
 logger = logging.getLogger(__name__)
+
+SEED = 42
+
+
+def _pin_seeds(seed: int = SEED) -> None:
+    """Pin random seeds for reproducible benchmark results."""
+    random.seed(seed)
+    np.random.seed(seed)  # noqa: NPY002
+    try:
+        import torch
+
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+    except ImportError:
+        pass
 
 
 def main() -> None:
@@ -65,6 +84,7 @@ def main() -> None:
 
 def run_structural_benchmark(args: argparse.Namespace) -> None:
     """Run structural-only benchmark (no embeddings)."""
+    _pin_seeds()
     fm = FixtureManager()
     documents = fm.load_all()
 
@@ -118,6 +138,7 @@ def _get_available_models() -> list[EmbeddingModelName]:
 
 def run_retrieval_benchmark(args: argparse.Namespace) -> None:
     """Run full benchmark including embeddings and retrieval."""
+    _pin_seeds()
     from scaffolder.embedding import EmbeddingPipeline
     from scaffolder.metrics.retrieval import compute_retrieval_metrics
     from scaffolder.metrics.statistical import compute_all_significance

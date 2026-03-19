@@ -125,3 +125,6 @@ class FixtureManager:
             document_type=document_type,
             source=filename,
         )
+
+
+__all__ = ["FixtureManager"]

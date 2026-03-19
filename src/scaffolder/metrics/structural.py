@@ -6,9 +6,22 @@ import logging
 import re
 from dataclasses import dataclass
 
-from scaffolder.models import ChunkSet, Document, StructuralMetrics
+from scaffolder.models import Chunk, ChunkSet, Document, StrategyName, StructuralMetrics
 
 logger = logging.getLogger(__name__)
+
+
+def _effective_text(chunk: Chunk) -> str:
+    """Return the text to use for structural analysis.
+
+    For LEXICHUNK_CONTEXTUAL chunks, use the original text (without the
+    context header) so the header doesn't inflate structural metric scores.
+    """
+    if chunk.strategy == StrategyName.LEXICHUNK_CONTEXTUAL:
+        original = chunk.metadata.get("original_text")
+        if isinstance(original, str) and original:
+            return original
+    return chunk.text
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,7 +172,7 @@ def clause_fragmentation_rate(chunk_set: ChunkSet, document: Document) -> float:
     for clause_text in non_trivial_clauses:
         best_coverage = 0.0
         for chunk in chunk_set.chunks:
-            overlap = _text_overlap_ratio(chunk.text, clause_text)
+            overlap = _text_overlap_ratio(_effective_text(chunk), clause_text)
             best_coverage = max(best_coverage, overlap)
             if best_coverage >= threshold:
                 break
@@ -199,7 +212,7 @@ def definition_preservation_rate(chunk_set: ChunkSet, document: Document) -> flo
         term_lower = term.lower().strip()
 
         for chunk in chunk_set.chunks:
-            chunk_lower = chunk.text.lower()
+            chunk_lower = _effective_text(chunk).lower()
             if term_lower not in chunk_lower:
                 continue
 
@@ -236,7 +249,7 @@ def cross_ref_resolution_rate(chunk_set: ChunkSet, document: Document) -> float:
         target_lower = ref["target"].lower()
 
         for i, chunk in enumerate(chunks_list):
-            chunk_lower = chunk.text.lower()
+            chunk_lower = _effective_text(chunk).lower()
             if ref_text_lower not in chunk_lower:
                 continue
 
@@ -252,7 +265,8 @@ def cross_ref_resolution_rate(chunk_set: ChunkSet, document: Document) -> float:
 
             # Check 3: target is in adjacent chunk (index +/- 1)
             found_adjacent = any(
-                0 <= adj_i < len(chunks_list) and target_lower in chunks_list[adj_i].text.lower()
+                0 <= adj_i < len(chunks_list)
+                and target_lower in _effective_text(chunks_list[adj_i]).lower()
                 for adj_i in (i - 1, i + 1)
             )
             if found_adjacent:
@@ -279,7 +293,7 @@ def hierarchy_depth_retained(chunk_set: ChunkSet, document: Document) -> float:
     section_pattern = re.compile(r"(\d+(?:\.\d+)*)\.")
 
     for chunk in chunk_set.chunks:
-        for match in section_pattern.finditer(chunk.text):
+        for match in section_pattern.finditer(_effective_text(chunk)):
             depth = match.group(1).count(".") + 1
             max_chunk_depth = max(max_chunk_depth, depth)
 
