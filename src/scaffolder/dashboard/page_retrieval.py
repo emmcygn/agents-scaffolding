@@ -299,7 +299,7 @@ def _compute_mrr(hits: list[dict[str, Any]], relevant_descriptions: list[str]) -
     """Compute Mean Reciprocal Rank."""
     for h in hits:
         if _is_hit_relevant(h, relevant_descriptions):
-            return 1.0 / h["rank"]
+            return 1.0 / float(h["rank"])
     return 0.0
 
 
