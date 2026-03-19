@@ -44,7 +44,7 @@ class VectorIndex:
     @property
     def size(self) -> int:
         """Number of vectors in the index."""
-        return self._index.ntotal
+        return int(self._index.ntotal)
 
     def add(
         self,

@@ -127,7 +127,7 @@ def _structural_bar_chart(result: BenchmarkResult) -> str:
         height=500,
     )
 
-    return pio.to_html(fig, full_html=False, include_plotlyjs="cdn")
+    return str(pio.to_html(fig, full_html=False, include_plotlyjs="cdn"))
 
 
 def _structural_heatmap(result: BenchmarkResult) -> str:
@@ -146,13 +146,13 @@ def _structural_heatmap(result: BenchmarkResult) -> str:
     for strat in strategies:
         row = []
         for doc in documents:
-            sm = by_sd.get((strat, doc))
-            if sm:
+            sm_entry = by_sd.get((strat, doc))
+            if sm_entry:
                 composite = (
-                    (1 - sm.clause_fragmentation_rate)
-                    + sm.definition_preservation_rate
-                    + sm.cross_ref_resolution_rate
-                    + sm.hierarchy_depth_retained
+                    (1 - sm_entry.clause_fragmentation_rate)
+                    + sm_entry.definition_preservation_rate
+                    + sm_entry.cross_ref_resolution_rate
+                    + sm_entry.hierarchy_depth_retained
                 ) / 4.0
                 row.append(round(composite, 3))
             else:
@@ -178,7 +178,7 @@ def _structural_heatmap(result: BenchmarkResult) -> str:
         template="plotly_white",
     )
 
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    return str(pio.to_html(fig, full_html=False, include_plotlyjs=False))
 
 
 def _retrieval_bar_chart(result: BenchmarkResult, model_name: str) -> str:
@@ -221,7 +221,7 @@ def _retrieval_bar_chart(result: BenchmarkResult, model_name: str) -> str:
         template="plotly_white",
         height=450,
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    return str(pio.to_html(fig, full_html=False, include_plotlyjs=False))
 
 
 def _model_comparison_chart(result: BenchmarkResult) -> str:
@@ -259,7 +259,7 @@ def _model_comparison_chart(result: BenchmarkResult) -> str:
         template="plotly_white",
         height=450,
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    return str(pio.to_html(fig, full_html=False, include_plotlyjs=False))
 
 
 def _drm_chart(result: BenchmarkResult) -> str:
@@ -290,4 +290,4 @@ def _drm_chart(result: BenchmarkResult) -> str:
         template="plotly_white",
         height=350,
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    return str(pio.to_html(fig, full_html=False, include_plotlyjs=False))

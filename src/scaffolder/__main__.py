@@ -11,9 +11,11 @@ from pathlib import Path
 from scaffolder.chunking import ChunkingPipeline, get_all_strategies
 from scaffolder.fixtures import FixtureManager
 from scaffolder.metrics.structural import compute_structural_metrics
-from scaffolder.models import BenchmarkResult
+from scaffolder.models import BenchmarkResult, EmbeddingModelName
 from scaffolder.reporting.cli import render_benchmark
 from scaffolder.reporting.json_export import export_json
+
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -71,7 +73,7 @@ def run_structural_benchmark(args: argparse.Namespace) -> None:
     strategy_results = pipeline.run(documents)
 
     result = BenchmarkResult(
-        timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
+        timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         strategies=[sr.strategy for sr in strategy_results],
         documents=[d.id for d in documents],
         strategy_results=strategy_results,
@@ -97,14 +99,12 @@ def run_structural_benchmark(args: argparse.Namespace) -> None:
         print(f"\nJSON exported to: {json_path}")
 
 
-def _get_available_models() -> list:
+def _get_available_models() -> list[EmbeddingModelName]:
     """Return list of available embedding models.
 
     Always includes local models. Includes Voyage only if API key is set.
     """
-    from scaffolder.models import EmbeddingModelName
-
-    models = [EmbeddingModelName.MINILM]
+    models: list[EmbeddingModelName] = [EmbeddingModelName.MINILM]
 
     voyage_key = os.environ.get("VOYAGE_API_KEY")
     if voyage_key:
@@ -114,9 +114,6 @@ def _get_available_models() -> list:
         logger.info("VOYAGE_API_KEY not set, skipping voyage-law-2.")
 
     return models
-
-
-logger = logging.getLogger(__name__)
 
 
 def run_retrieval_benchmark(args: argparse.Namespace) -> None:
@@ -137,7 +134,7 @@ def run_retrieval_benchmark(args: argparse.Namespace) -> None:
 
     models = _get_available_models()
     result = BenchmarkResult(
-        timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
+        timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         strategies=[sr.strategy for sr in strategy_results],
         documents=[d.id for d in documents],
         models=models,
@@ -214,7 +211,7 @@ def run_report(args: argparse.Namespace) -> None:
         strategy_results = pipeline.run(documents)
 
         result = BenchmarkResult(
-            timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
+            timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             strategies=[sr.strategy for sr in strategy_results],
             documents=[d.id for d in documents],
             strategy_results=strategy_results,
@@ -235,7 +232,6 @@ def _reconstruct_benchmark_result(data: dict) -> BenchmarkResult:  # type: ignor
     import contextlib
 
     from scaffolder.models import (
-        EmbeddingModelName,
         RetrievalMetrics,
         SignificanceResult,
         StrategyName,

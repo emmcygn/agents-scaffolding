@@ -12,12 +12,12 @@ from scaffolder.chunking.strategies import (
 )
 from scaffolder.models import ChunkingStrategy, StrategyName
 
-_STRATEGY_REGISTRY: dict[StrategyName, type[ChunkingStrategy]] = {
-    StrategyName.LEXICHUNK: LexiChunkStrategy,  # type: ignore[dict-item]
-    StrategyName.LEXICHUNK_CONTEXTUAL: LexiChunkContextualStrategy,  # type: ignore[dict-item]
-    StrategyName.RCTS: RCTSStrategy,  # type: ignore[dict-item]
-    StrategyName.SENTENCE_SPLIT: SentenceSplitStrategy,  # type: ignore[dict-item]
-    StrategyName.FIXED_SIZE: FixedSizeStrategy,  # type: ignore[dict-item]
+_STRATEGY_REGISTRY: dict[StrategyName, type] = {
+    StrategyName.LEXICHUNK: LexiChunkStrategy,
+    StrategyName.LEXICHUNK_CONTEXTUAL: LexiChunkContextualStrategy,
+    StrategyName.RCTS: RCTSStrategy,
+    StrategyName.SENTENCE_SPLIT: SentenceSplitStrategy,
+    StrategyName.FIXED_SIZE: FixedSizeStrategy,
 }
 
 
@@ -26,7 +26,9 @@ def get_strategy(name: StrategyName, **kwargs: object) -> ChunkingStrategy:
     if name not in _STRATEGY_REGISTRY:
         msg = f"Unknown strategy: {name}. Available: {list(_STRATEGY_REGISTRY.keys())}"
         raise ValueError(msg)
-    return _STRATEGY_REGISTRY[name](**kwargs)  # type: ignore[return-value]
+    cls = _STRATEGY_REGISTRY[name]
+    strategy: ChunkingStrategy = cls(**kwargs)
+    return strategy
 
 
 def get_all_strategies(**kwargs: object) -> list[ChunkingStrategy]:

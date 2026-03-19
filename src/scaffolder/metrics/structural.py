@@ -205,8 +205,9 @@ def definition_preservation_rate(chunk_set: ChunkSet, document: Document) -> flo
 
             has_definition = any(ind in chunk_lower for ind in definition_indicators)
             has_quoted = f'"{term_lower}"' in chunk_lower or f"'{term_lower}'" in chunk_lower
+            defined_terms_meta = chunk.metadata.get("defined_terms")
             has_metadata = bool(
-                chunk.metadata.get("defined_terms") and term in chunk.metadata["defined_terms"]
+                isinstance(defined_terms_meta, (list, set, tuple)) and term in defined_terms_meta
             )
 
             if has_definition or has_quoted or has_metadata:
@@ -305,7 +306,7 @@ def chunk_size_cv(chunk_set: ChunkSet) -> float:
     if mean == 0:
         return 0.0
     variance = sum((s - mean) ** 2 for s in sizes) / len(sizes)
-    std_dev = variance**0.5
+    std_dev = float(variance**0.5)
     return std_dev / mean
 
 

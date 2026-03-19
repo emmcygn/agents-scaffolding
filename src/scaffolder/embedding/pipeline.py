@@ -6,7 +6,7 @@ import hashlib
 import logging
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -51,9 +51,9 @@ class SentenceTransformerAdapter:
         self.model_name = model_name
         self.dimension = _MODEL_DIMS[model_name]
         self._model_id = _MODEL_IDS[model_name]
-        self._model: object | None = None
+        self._model: Any = None  # noqa: UP037
 
-    def _load_model(self) -> object:
+    def _load_model(self) -> Any:  # noqa: UP037
         """Load the sentence-transformers model (slow, cached after first call)."""
         if self._model is None:
             from sentence_transformers import SentenceTransformer
@@ -74,7 +74,7 @@ class SentenceTransformerAdapter:
                 for t in texts_list
             ]
 
-        embeddings = model.encode(  # type: ignore[union-attr]
+        embeddings = model.encode(
             texts_list,
             normalize_embeddings=True,
             show_progress_bar=False,
@@ -110,7 +110,8 @@ class EmbeddingCache:
         path = self._path(model_name, key)
         if path.exists():
             self._hits += 1
-            return np.load(path)  # type: ignore[return-value]
+            loaded: npt.NDArray[np.float32] = np.load(path)
+            return loaded
         self._misses += 1
         return None
 
@@ -174,7 +175,7 @@ class EmbeddingCache:
 class _VoyageAdapterWrapper:
     """Wraps Agent B's VoyageEmbedder (embed -> list[list[float]]) to match our interface."""
 
-    def __init__(self, voyage: object) -> None:
+    def __init__(self, voyage: Any) -> None:  # noqa: UP037
         self._voyage = voyage
 
     @property
@@ -186,7 +187,7 @@ class _VoyageAdapterWrapper:
         return _MODEL_DIMS[EmbeddingModelName.VOYAGE_LAW_2]
 
     def embed_texts(self, texts: Sequence[str]) -> npt.NDArray[np.float32]:
-        result = self._voyage.embed(list(texts))  # type: ignore[union-attr]
+        result = self._voyage.embed(list(texts))
         return np.asarray(result, dtype=np.float32)
 
 
@@ -206,11 +207,11 @@ class EmbeddingPipeline:
         cache_dir: Path | None = None,
         use_cache: bool = True,
     ) -> None:
-        self._adapters: dict[EmbeddingModelName, object] = {}
+        self._adapters: dict[EmbeddingModelName, Any] = {}  # noqa: UP037
         self._cache = EmbeddingCache(cache_dir) if use_cache else None
         self._models = list(models or [EmbeddingModelName.MINILM])
 
-    def _get_adapter(self, model_name: EmbeddingModelName) -> object:
+    def _get_adapter(self, model_name: EmbeddingModelName) -> Any:  # noqa: UP037
         """Get or create an adapter for the given model."""
         if model_name not in self._adapters:
             if model_name in (
@@ -235,7 +236,8 @@ class EmbeddingPipeline:
         texts_list = list(texts)
 
         if self._cache is None:
-            return adapter.embed_texts(texts_list)  # type: ignore[union-attr]
+            emb_result: npt.NDArray[np.float32] = adapter.embed_texts(texts_list)
+            return emb_result
 
         # Check cache for batch
         cached_result, uncached_indices = self._cache.get_batch(model_name.value, texts_list)
@@ -258,7 +260,7 @@ class EmbeddingPipeline:
             len(uncached_indices),
             model_name.value,
         )
-        new_embeddings = adapter.embed_texts(uncached_texts)  # type: ignore[union-attr]
+        new_embeddings: npt.NDArray[np.float32] = adapter.embed_texts(uncached_texts)
 
         # Store in cache
         for j, idx in enumerate(uncached_indices):

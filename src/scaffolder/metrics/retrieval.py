@@ -123,9 +123,11 @@ def ndcg_at_k(
 
 def _dcg(grades: list[int]) -> float:
     """Discounted Cumulative Gain."""
-    return sum(
-        (2**g - 1) / math.log2(i + 2)  # i+2: 0-indexed i, rank 1-indexed
-        for i, g in enumerate(grades)
+    return float(
+        sum(
+            (2**g - 1) / math.log2(i + 2)  # i+2: 0-indexed i, rank 1-indexed
+            for i, g in enumerate(grades)
+        )
     )
 
 
