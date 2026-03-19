@@ -215,21 +215,23 @@ def render_page() -> None:
         lexi_key = f"chunks_{document.id}_lexichunk"
         base_key = f"chunks_{document.id}_{baseline_value}"
 
-        with st.spinner("Chunking with LexiChunk..."):
-            try:
-                lexi_result = _chunk_document(document, "lexichunk")
-                st.session_state[lexi_key] = lexi_result
-            except Exception as e:
-                st.error(f"LexiChunk chunking failed: {e}")
-                return
+        progress = st.progress(0, text="Chunking with LexiChunk...")
+        try:
+            lexi_result = _chunk_document(document, "lexichunk")
+            st.session_state[lexi_key] = lexi_result
+        except Exception as e:
+            st.error(f"LexiChunk chunking failed: {e}")
+            return
 
-        with st.spinner(f"Chunking with {baseline_label}..."):
-            try:
-                base_result = _chunk_document(document, baseline_value)
-                st.session_state[base_key] = base_result
-            except Exception as e:
-                st.error(f"{baseline_label} chunking failed: {e}")
-                return
+        progress.progress(50, text=f"Chunking with {baseline_label}...")
+        try:
+            base_result = _chunk_document(document, baseline_value)
+            st.session_state[base_key] = base_result
+        except Exception as e:
+            st.error(f"{baseline_label} chunking failed: {e}")
+            return
+
+        progress.progress(100, text="Chunking complete!")
 
         st.session_state["last_doc_id"] = document.id
         st.session_state["last_baseline"] = baseline_value

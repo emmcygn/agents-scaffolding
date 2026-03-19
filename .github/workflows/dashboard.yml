@@ -1,0 +1,44 @@
+name: Dashboard Smoke Test
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "src/scaffolder/dashboard/**"
+      - "streamlit_app.py"
+      - "requirements-dashboard.txt"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "src/scaffolder/dashboard/**"
+      - "streamlit_app.py"
+      - "requirements-dashboard.txt"
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -e ".[dashboard,dev]"
+
+      - name: Import check
+        run: |
+          python -c "from scaffolder.dashboard.app import main; print('app OK')"
+          python -c "from scaffolder.dashboard.page_compare import render_page; print('compare OK')"
+          python -c "from scaffolder.dashboard.page_retrieval import render_page; print('retrieval OK')"
+          python -c "from scaffolder.dashboard.page_metrics import render_page; print('metrics OK')"
+          python -c "from scaffolder.dashboard.components import render_chunk_card; print('components OK')"
+          python -c "from scaffolder.dashboard.compat import get_available_features; print('compat OK')"
+
+      - name: Streamlit health check
+        run: |
+          timeout 15 streamlit run streamlit_app.py --server.headless true --server.port 8501 &
+          sleep 5
+          curl -f http://localhost:8501/_stcore/health || exit 1
+          echo "Dashboard health check passed"

@@ -149,68 +149,83 @@ def _run_retrieval(
     """Run retrieval for a query across selected strategies and display results."""
     k = st.session_state.get("ret_k", 5)
 
-    with st.spinner("Running retrieval pipeline..."):
-        try:
-            from scaffolder.chunking import get_strategy
-            from scaffolder.embedding.pipeline import EmbeddingPipeline
-            from scaffolder.fixtures import FixtureManager
-            from scaffolder.models import EmbeddingModelName, StrategyName
-            from scaffolder.retrieval.index import VectorIndex
+    total = len(strategies)
+    progress = st.progress(0, text="Initialising retrieval pipeline...")
 
-            manager = FixtureManager()
-            document = manager.get_by_id(doc_id)
+    try:
+        from scaffolder.chunking import get_strategy
+        from scaffolder.embedding.pipeline import EmbeddingPipeline
+        from scaffolder.fixtures import FixtureManager
+        from scaffolder.models import EmbeddingModelName, StrategyName
+        from scaffolder.retrieval.index import VectorIndex
 
-            # Map string model name to enum
-            model_enum = EmbeddingModelName(model_name)
-            embed_pipeline = EmbeddingPipeline()
+        manager = FixtureManager()
+        document = manager.get_by_id(doc_id)
 
-            results_by_strategy: dict[str, list[dict[str, Any]]] = {}
+        model_enum = EmbeddingModelName(model_name)
+        embed_pipeline = EmbeddingPipeline()
 
-            for strat_name in strategies:
-                # Get or cache chunk set
-                chunk_key = f"chunks_{doc_id}_{strat_name}"
-                chunk_set = st.session_state.get(chunk_key)
-                if chunk_set is None:
-                    strategy = get_strategy(StrategyName(strat_name))
-                    chunk_set = strategy.chunk(document)
-                    st.session_state[chunk_key] = chunk_set
+        results_by_strategy: dict[str, list[dict[str, Any]]] = {}
 
-                chunks = list(chunk_set.chunks)
-                if not chunks:
-                    continue
+        for i, strat_name in enumerate(strategies):
+            pct_base = int(i / total * 100)
+            progress.progress(pct_base, text=f"{strat_name}: chunking...")
 
-                # Get or cache index
-                index_key = f"index_{doc_id}_{strat_name}_{model_name}"
-                index = st.session_state.get(index_key)
-                if index is None:
-                    chunk_texts = [c.text for c in chunks]
-                    embeddings = embed_pipeline.embed_texts(chunk_texts, model_enum)
-                    index = VectorIndex(dimension=embeddings.shape[1])
-                    index.add(chunks, embeddings)
-                    st.session_state[index_key] = index
+            # Get or cache chunk set
+            chunk_key = f"chunks_{doc_id}_{strat_name}"
+            chunk_set = st.session_state.get(chunk_key)
+            if chunk_set is None:
+                strategy = get_strategy(StrategyName(strat_name))
+                chunk_set = strategy.chunk(document)
+                st.session_state[chunk_key] = chunk_set
 
-                # Embed query and search
-                query_emb = embed_pipeline.embed_texts([query_text], model_enum)
-                hits = index.search(query_emb[0], k=k)
+            chunks = list(chunk_set.chunks)
+            if not chunks:
+                continue
 
-                results_by_strategy[strat_name] = [
-                    {
-                        "rank": h.rank,
-                        "score": h.score,
-                        "text": h.chunk.text[:500],
-                        "full_text": h.chunk.text,
-                        "chunk_id": h.chunk.id,
-                        "document_id": h.chunk.document_id,
-                        "clause_type": h.chunk.metadata.get("clause_type", ""),
-                    }
-                    for h in hits
-                ]
+            progress.progress(
+                pct_base + int(30 / total),
+                text=f"{strat_name}: embedding & indexing...",
+            )
 
-            st.session_state["ret_results"] = results_by_strategy
+            # Get or cache index
+            index_key = f"index_{doc_id}_{strat_name}_{model_name}"
+            index = st.session_state.get(index_key)
+            if index is None:
+                chunk_texts = [c.text for c in chunks]
+                embeddings = embed_pipeline.embed_texts(chunk_texts, model_enum)
+                index = VectorIndex(dimension=embeddings.shape[1])
+                index.add(chunks, embeddings)
+                st.session_state[index_key] = index
 
-        except Exception as e:
-            st.error(f"Retrieval failed: {e}")
-            return
+            progress.progress(
+                pct_base + int(70 / total),
+                text=f"{strat_name}: searching...",
+            )
+
+            # Embed query and search
+            query_emb = embed_pipeline.embed_texts([query_text], model_enum)
+            hits = index.search(query_emb[0], k=k)
+
+            results_by_strategy[strat_name] = [
+                {
+                    "rank": h.rank,
+                    "score": h.score,
+                    "text": h.chunk.text[:500],
+                    "full_text": h.chunk.text,
+                    "chunk_id": h.chunk.id,
+                    "document_id": h.chunk.document_id,
+                    "clause_type": h.chunk.metadata.get("clause_type", ""),
+                }
+                for h in hits
+            ]
+
+        progress.progress(100, text="Retrieval complete!")
+        st.session_state["ret_results"] = results_by_strategy
+
+    except Exception as e:
+        st.error(f"Retrieval failed: {e}")
+        return
 
     # Display results
     _display_retrieval_results(results_by_strategy)
