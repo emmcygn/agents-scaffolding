@@ -13,7 +13,8 @@ import streamlit as st
 def _load_results() -> dict[str, Any] | None:
     """Load benchmark results from file or session state."""
     if "benchmark_result" in st.session_state:
-        return st.session_state["benchmark_result"]
+        result: dict[str, Any] = st.session_state["benchmark_result"]
+        return result
 
     results_dir = Path("results")
     if results_dir.exists():
@@ -22,7 +23,7 @@ def _load_results() -> dict[str, Any] | None:
             with open(json_files[0]) as f:
                 data = json.load(f)
             st.session_state["benchmark_result"] = data
-            return data
+            return data  # type: ignore[no-any-return]
 
     return None
 
@@ -289,7 +290,8 @@ def _render_retrieval_comparison(data: dict[str, Any]) -> None:
         s = r["strategy"]
         p_at_k = r.get("precision_at_k", r.get("precision_at_5", 0))
         if isinstance(p_at_k, dict):
-            strategy_metrics[s]["P@5"].append(p_at_k.get("5", p_at_k.get(5, 0)))
+            p5_val = p_at_k.get("5") or p_at_k.get(5) or 0
+            strategy_metrics[s]["P@5"].append(float(p5_val))
         else:
             strategy_metrics[s]["P@5"].append(r.get("precision_at_5", 0))
         strategy_metrics[s]["MRR"].append(r["mrr"])

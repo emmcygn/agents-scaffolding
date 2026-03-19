@@ -79,7 +79,7 @@ def render_chunk_card(
 ) -> None:
     """Render a single chunk as a styled expandable card."""
     clause_type = str(chunk.metadata.get("clause_type", "general"))
-    confidence = float(chunk.metadata.get("confidence", 0.0))
+    confidence = float(str(chunk.metadata.get("confidence", 0.0)))
     color = CLAUSE_TYPE_COLORS.get(clause_type, DEFAULT_CHUNK_COLOR)
 
     char_count = chunk.char_count
@@ -107,7 +107,8 @@ def render_chunk_card(
             )
 
         # Defined terms as badges
-        defined_terms = list(chunk.metadata.get("defined_terms", []))
+        raw_terms = chunk.metadata.get("defined_terms", [])
+        defined_terms = list(raw_terms) if isinstance(raw_terms, (list, tuple)) else []
         if defined_terms and show_metadata:
             badges = " ".join(
                 f'<span style="background: #E3F2FD; color: #1565C0; '
@@ -119,7 +120,8 @@ def render_chunk_card(
             st.markdown("")
 
         # Cross-references
-        cross_refs = list(chunk.metadata.get("cross_refs", []))
+        raw_refs = chunk.metadata.get("cross_refs", [])
+        cross_refs = list(raw_refs) if isinstance(raw_refs, (list, tuple)) else []
         if cross_refs and show_metadata:
             ref_text = ", ".join(html.escape(str(ref)) for ref in cross_refs[:5])
             st.markdown(

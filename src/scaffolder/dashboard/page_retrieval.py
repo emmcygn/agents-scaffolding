@@ -142,11 +142,11 @@ def _run_retrieval(
             from scaffolder.chunking import get_strategy
             from scaffolder.embedding.pipeline import EmbeddingPipeline
             from scaffolder.fixtures import FixtureManager
-            from scaffolder.models import EmbeddingModelName
+            from scaffolder.models import EmbeddingModelName, StrategyName
             from scaffolder.retrieval.index import VectorIndex
 
             manager = FixtureManager()
-            document = manager.load(doc_id)
+            document = manager.get_by_id(doc_id)
 
             # Map string model name to enum
             model_enum = EmbeddingModelName(model_name)
@@ -159,7 +159,7 @@ def _run_retrieval(
                 chunk_key = f"chunks_{doc_id}_{strat_name}"
                 chunk_set = st.session_state.get(chunk_key)
                 if chunk_set is None:
-                    strategy = get_strategy(strat_name)
+                    strategy = get_strategy(StrategyName(strat_name))
                     chunk_set = strategy.chunk(document)
                     st.session_state[chunk_key] = chunk_set
 
@@ -299,10 +299,11 @@ def _render_filtered_retrieval(doc_id: str) -> None:
                 try:
                     from scaffolder.chunking import get_strategy
                     from scaffolder.fixtures import FixtureManager
+                    from scaffolder.models import StrategyName
 
                     manager = FixtureManager()
-                    document = manager.load(doc_id)
-                    strategy = get_strategy("lexichunk")
+                    document = manager.get_by_id(doc_id)
+                    strategy = get_strategy(StrategyName("lexichunk"))
                     chunk_set = strategy.chunk(document)
                     st.session_state[chunk_set_key] = chunk_set
                 except Exception as e:
