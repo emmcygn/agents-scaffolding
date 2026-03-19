@@ -22,7 +22,18 @@ def _load_annotated_queries(document_id: str) -> list[dict[str, Any]]:
     from scaffolder.queries import load_queries_for_document
 
     queries = load_queries_for_document("queries", document_id)
-    return [{"id": q.id, "text": q.text, "failure_mode": q.failure_mode} for q in queries]
+    return [
+        {
+            "id": q.id,
+            "text": q.text,
+            "failure_mode": q.failure_mode,
+            "relevant_sections": [
+                {"section_id": s.section_id, "relevance": s.relevance, "description": s.description}
+                for s in q.relevant_sections
+            ],
+        }
+        for q in queries
+    ]
 
 
 def _check_retrieval_available() -> bool:
@@ -96,6 +107,7 @@ def render_page() -> None:
                 key="ret_annotated_query",
             )
             query = annotated[selected_idx]["text"]
+            st.session_state["ret_annotated_info"] = annotated[selected_idx]
             st.caption(
                 f"Query ID: {annotated[selected_idx]['id']} | "
                 f"Tests: {annotated[selected_idx]['failure_mode']}"
@@ -186,7 +198,9 @@ def _run_retrieval(
                         "rank": h.rank,
                         "score": h.score,
                         "text": h.chunk.text[:500],
+                        "full_text": h.chunk.text,
                         "chunk_id": h.chunk.id,
+                        "document_id": h.chunk.document_id,
                         "clause_type": h.chunk.metadata.get("clause_type", ""),
                     }
                     for h in hits
@@ -203,11 +217,28 @@ def _run_retrieval(
 
 
 def _display_retrieval_results(results_by_strategy: dict[str, list[dict[str, Any]]]) -> None:
-    """Display retrieval results side by side."""
+    """Display retrieval results with P@k chart, metrics table, and per-strategy chunks."""
     if not results_by_strategy:
         st.warning("No results returned.")
         return
 
+    # Resolve relevant section descriptions for relevance matching
+    annotated_info: dict[str, Any] | None = st.session_state.get("ret_annotated_info")
+    relevant_descriptions: list[str] = []
+    if annotated_info and "relevant_sections" in annotated_info:
+        relevant_descriptions = [
+            s["description"].lower()
+            for s in annotated_info["relevant_sections"]
+            if s.get("description")
+        ]
+
+    # --- P@k Comparison Chart ---
+    _render_precision_chart(results_by_strategy, relevant_descriptions)
+
+    # --- Metrics Summary Table ---
+    _render_metrics_table(results_by_strategy, relevant_descriptions)
+
+    # --- Per-strategy results in columns ---
     strategy_names = list(results_by_strategy.keys())
     cols = st.columns(len(strategy_names))
 
@@ -220,12 +251,154 @@ def _display_retrieval_results(results_by_strategy: dict[str, list[dict[str, Any
                 continue
 
             for hit in hits:
-                clause_label = f" ({hit['clause_type']})" if hit["clause_type"] else ""
-                with st.expander(
-                    f"#{hit['rank']} — score: {hit['score']:.3f}{clause_label}",
-                    expanded=hit["rank"] <= 3,
-                ):
-                    st.text(hit["text"])
+                is_relevant = _is_hit_relevant(hit, relevant_descriptions)
+                _render_hit(hit, is_relevant)
+
+
+def _is_hit_relevant(hit: dict[str, Any], relevant_descriptions: list[str]) -> bool:
+    """Check if a retrieved chunk matches any annotated relevant section.
+
+    Uses text overlap: if the chunk text contains keywords from a relevant
+    section description, it's considered relevant. This is a heuristic since
+    we don't have exact section-to-chunk mappings.
+    """
+    if not relevant_descriptions:
+        return False
+    chunk_text = hit.get("full_text", hit.get("text", "")).lower()
+    for desc in relevant_descriptions:
+        # Check if key terms from the section description appear in the chunk
+        terms = [t for t in desc.split() if len(t) > 4]
+        if terms and sum(1 for t in terms if t in chunk_text) >= len(terms) * 0.5:
+            return True
+    return False
+
+
+def _count_relevant_in_top_k(
+    hits: list[dict[str, Any]], relevant_descriptions: list[str], k: int
+) -> int:
+    """Count how many of the top-k hits are relevant."""
+    return sum(1 for h in hits[:k] if _is_hit_relevant(h, relevant_descriptions))
+
+
+def _compute_mrr(hits: list[dict[str, Any]], relevant_descriptions: list[str]) -> float:
+    """Compute Mean Reciprocal Rank."""
+    for h in hits:
+        if _is_hit_relevant(h, relevant_descriptions):
+            return 1.0 / h["rank"]
+    return 0.0
+
+
+def _compute_ndcg(hits: list[dict[str, Any]], relevant_descriptions: list[str], k: int) -> float:
+    """Compute NDCG@k with binary relevance."""
+    import math
+
+    dcg = 0.0
+    for h in hits[:k]:
+        if _is_hit_relevant(h, relevant_descriptions):
+            dcg += 1.0 / math.log2(h["rank"] + 1)
+
+    # Ideal DCG: all relevant items ranked at top
+    n_relevant = sum(1 for h in hits if _is_hit_relevant(h, relevant_descriptions))
+    idcg = sum(1.0 / math.log2(i + 2) for i in range(min(n_relevant, k)))
+
+    return dcg / idcg if idcg > 0 else 0.0
+
+
+def _render_precision_chart(
+    results_by_strategy: dict[str, list[dict[str, Any]]],
+    relevant_descriptions: list[str],
+) -> None:
+    """Render a Plotly grouped bar chart comparing P@k across strategies."""
+    if not relevant_descriptions:
+        return
+
+    import plotly.graph_objects as go
+
+    k_values = [1, 3, 5, 10]
+    colors = ["#2196F3", "#FF9800", "#4CAF50", "#9C27B0", "#F44336"]
+
+    fig = go.Figure()
+    for i, (strat_name, hits) in enumerate(results_by_strategy.items()):
+        p_at_k_values = []
+        for kv in k_values:
+            n_rel = _count_relevant_in_top_k(hits, relevant_descriptions, kv)
+            p_at_k_values.append(n_rel / kv if kv > 0 else 0.0)
+
+        fig.add_trace(
+            go.Bar(
+                name=strat_name,
+                x=[f"P@{kv}" for kv in k_values],
+                y=p_at_k_values,
+                marker_color=colors[i % len(colors)],
+            )
+        )
+
+    fig.update_layout(
+        title="Precision@k Comparison",
+        xaxis_title="Metric",
+        yaxis_title="Score",
+        yaxis={"range": [0, 1.05]},
+        barmode="group",
+        height=350,
+        margin={"l": 40, "r": 20, "t": 50, "b": 40},
+        legend={"yanchor": "top", "y": 0.99, "xanchor": "right", "x": 0.99},
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_metrics_table(
+    results_by_strategy: dict[str, list[dict[str, Any]]],
+    relevant_descriptions: list[str],
+) -> None:
+    """Render a summary table of retrieval metrics per strategy."""
+    if not relevant_descriptions:
+        st.caption("Select an annotated query to see retrieval metrics.")
+        return
+
+    rows: list[dict[str, str]] = []
+    for strat_name, hits in results_by_strategy.items():
+        mrr_val = _compute_mrr(hits, relevant_descriptions)
+        ndcg_val = _compute_ndcg(hits, relevant_descriptions, k=10)
+        p5 = _count_relevant_in_top_k(hits, relevant_descriptions, 5) / 5 if hits else 0.0
+        rows.append(
+            {
+                "Strategy": strat_name,
+                "P@5": f"{p5:.3f}",
+                "MRR": f"{mrr_val:.3f}",
+                "NDCG@10": f"{ndcg_val:.3f}",
+            }
+        )
+
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+
+
+def _render_hit(hit: dict[str, Any], is_relevant: bool) -> None:
+    """Render a single retrieval hit with optional relevance highlighting."""
+    clause_label = f" ({hit['clause_type']})" if hit.get("clause_type") else ""
+
+    if is_relevant:
+        # Green border + RELEVANT badge
+        st.markdown(
+            f'<div style="border-left: 4px solid #4CAF50; padding-left: 8px; '
+            f'margin-bottom: 4px;">'
+            f"<strong>#{hit['rank']}</strong> — score: {hit['score']:.3f}{clause_label} "
+            f'<span style="background: #C8E6C9; color: #2E7D32; padding: 1px 6px; '
+            f'border-radius: 8px; font-size: 0.8em; font-weight: bold;">RELEVANT</span>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f'<div style="border-left: 4px solid #ccc; padding-left: 8px; '
+            f'margin-bottom: 4px;">'
+            f"<strong>#{hit['rank']}</strong> — score: {hit['score']:.3f}{clause_label}"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    with st.expander(f"Chunk: {hit['chunk_id']}", expanded=hit["rank"] <= 3):
+        st.text(hit["text"])
 
 
 def _render_query_browser() -> None:
