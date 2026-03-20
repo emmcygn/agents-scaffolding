@@ -34,6 +34,19 @@ coverage.xml
 results/
 .cache/
 *.faiss
+requirements.lock
+scaffolder.yaml
+
+# Internal build artifacts (agent plans, research, task tracking)
+plans/
+reference-docs/
+research-docs/
+tasks/lessons.md
+tasks/gap-analysis-*.md
+
+# Claude Code settings
+.claude/
+CLAUDE.md
 
 # Environment variables
 .env
