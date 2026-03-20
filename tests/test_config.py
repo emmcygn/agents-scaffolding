@@ -17,7 +17,7 @@ class TestBenchmarkConfigDefaults:
 
     def test_default_strategies(self) -> None:
         config = BenchmarkConfig()
-        assert config.strategies == ["lexichunk", "langchain_rcts", "sentence_split", "fixed_512"]
+        assert config.strategies == ["lexichunk", "rcts", "sentence_split", "fixed_size"]
 
     def test_default_embedding_models(self) -> None:
         config = BenchmarkConfig()
@@ -101,14 +101,14 @@ class TestBenchmarkConfigYAML:
 
     def test_load_from_yaml(self, tmp_path: Path) -> None:
         yaml_content = {
-            "strategies": ["lexichunk", "fixed_512"],
+            "strategies": ["lexichunk", "fixed_size"],
             "top_k": 5,
         }
         config_file = tmp_path / "test_config.yaml"
         config_file.write_text(yaml.dump(yaml_content))
 
         config = BenchmarkConfig.from_yaml(config_file)
-        assert config.strategies == ["lexichunk", "fixed_512"]
+        assert config.strategies == ["lexichunk", "fixed_size"]
         assert config.top_k == 5
         assert config.k_values == [1, 3, 5, 10]
 
@@ -144,11 +144,11 @@ class TestBenchmarkConfigEnv:
     def test_strategies_from_env(self) -> None:
         with patch.dict(
             os.environ,
-            {"SCAFFOLDER_STRATEGIES": "lexichunk,fixed_512"},
+            {"SCAFFOLDER_STRATEGIES": "lexichunk,fixed_size"},
             clear=False,
         ):
             config = BenchmarkConfig.from_env()
-            assert config.strategies == ["lexichunk", "fixed_512"]
+            assert config.strategies == ["lexichunk", "fixed_size"]
 
     def test_top_k_from_env(self) -> None:
         with patch.dict(os.environ, {"SCAFFOLDER_TOP_K": "20"}, clear=False):

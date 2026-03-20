@@ -246,8 +246,8 @@ def render_page() -> None:
         lexi_key = f"chunks_{doc_id}_lexichunk"
         base_key = f"chunks_{doc_id}_{last_baseline}"
 
-        lexi_result = st.session_state.get(lexi_key)
-        base_result = st.session_state.get(base_key)
+        lexi_result = st.session_state.get(lexi_key)  # type: ignore[assignment]
+        base_result = st.session_state.get(base_key)  # type: ignore[assignment]
 
         if lexi_result and base_result:
             _render_results(lexi_result, base_result, last_baseline_label)

@@ -74,9 +74,7 @@ def render_page() -> None:
         st.slider("Top-k results", min_value=1, max_value=20, value=5, key="ret_k")
 
     # Strategies come from sidebar config (set in app.py)
-    strategies = st.session_state.get("config", {}).get(
-        "strategies", ["lexichunk", "langchain_rcts"]
-    )
+    strategies = st.session_state.get("config", {}).get("strategies", ["lexichunk", "rcts"])
 
     # --- Query Input ---
     st.subheader("Query")
@@ -506,7 +504,7 @@ def _render_filtered_retrieval(doc_id: str) -> None:
             st.markdown(f"**LexiChunk: {len(matching)} matching chunks**")
             if matching:
                 for i, chunk in enumerate(matching):
-                    confidence = float(chunk.metadata.get("confidence", 0))
+                    confidence = float(str(chunk.metadata.get("confidence", 0)))
                     with st.expander(
                         f"{selected_type} — Confidence: {confidence:.0%}",
                         expanded=i < 3,

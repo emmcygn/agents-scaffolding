@@ -315,7 +315,7 @@ All configuration is managed through `BenchmarkConfig` in `config.py`.
 All fields can be overridden with `SCAFFOLDER_` prefix:
 
 ```bash
-export SCAFFOLDER_STRATEGIES="lexichunk,fixed_512"
+export SCAFFOLDER_STRATEGIES="lexichunk,fixed_size"
 export SCAFFOLDER_TOP_K=20
 export SCAFFOLDER_ENABLE_VOYAGE=true
 export VOYAGE_API_KEY=your-key-here

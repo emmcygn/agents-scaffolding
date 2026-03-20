@@ -4,9 +4,9 @@
 # Chunking strategies to compare against LexiChunk
 strategies:
   - lexichunk
-  - langchain_rcts
+  - rcts
   - sentence_split
-  - fixed_512
+  - fixed_size
 
 # Embedding models for retrieval evaluation
 # Local models (no API key needed):

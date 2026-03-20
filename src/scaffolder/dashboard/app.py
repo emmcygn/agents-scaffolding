@@ -16,13 +16,15 @@ def _invalidate_on_change(key: str, new_value: Any) -> bool:
     if prev != new_value:
         st.session_state[prev_key] = new_value
         if key == "global_model":
-            keys_to_clear = [k for k in list(st.session_state) if k.startswith("index_")]
+            keys_to_clear = [k for k in list(st.session_state) if str(k).startswith("index_")]
             for k in keys_to_clear:
                 del st.session_state[k]
             return True
         if key == "strategies":
             keys_to_clear = [
-                k for k in list(st.session_state) if k.startswith("index_") or k.startswith("ret_")
+                k
+                for k in list(st.session_state)
+                if str(k).startswith("index_") or str(k).startswith("ret_")
             ]
             for k in keys_to_clear:
                 del st.session_state[k]
@@ -69,15 +71,15 @@ def main() -> None:
     # Global settings in sidebar
     if "config" not in st.session_state:
         st.session_state.config = {
-            "strategies": ["lexichunk", "langchain_rcts", "sentence_split", "fixed_512"],
+            "strategies": ["lexichunk", "rcts", "sentence_split", "fixed_size"],
             "embedding_model": "all-MiniLM-L6-v2",
         }
 
     # Strategy multi-select
     selected_strategies = st.sidebar.multiselect(
         "Strategies",
-        options=["lexichunk", "langchain_rcts", "sentence_split", "fixed_512"],
-        default=["lexichunk", "langchain_rcts"],
+        options=["lexichunk", "rcts", "sentence_split", "fixed_size"],
+        default=["lexichunk", "rcts"],
     )
     st.session_state.config["strategies"] = selected_strategies
     _invalidate_on_change("strategies", tuple(selected_strategies))
@@ -105,13 +107,13 @@ def main() -> None:
     st.sidebar.markdown("---")
     st.sidebar.markdown("**Cache**")
 
-    index_count = sum(1 for k in st.session_state if k.startswith("index_"))
-    chunk_count = sum(1 for k in st.session_state if k.startswith("chunks_"))
+    index_count = sum(1 for k in st.session_state if str(k).startswith("index_"))
+    chunk_count = sum(1 for k in st.session_state if str(k).startswith("chunks_"))
     st.sidebar.caption(f"Cached: {index_count} indexes, {chunk_count} chunk sets")
 
     if st.sidebar.button("Clear All Caches", type="secondary"):
         keys_to_clear = [
-            k for k in list(st.session_state) if k.startswith(("index_", "chunks_", "ret_"))
+            k for k in list(st.session_state) if str(k).startswith(("index_", "chunks_", "ret_"))
         ]
         for k in keys_to_clear:
             del st.session_state[k]

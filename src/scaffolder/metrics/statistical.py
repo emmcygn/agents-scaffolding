@@ -8,7 +8,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
-from scipy import stats
+from scipy import stats  # type: ignore[import-untyped]
 
 from scaffolder.models import (
     SignificanceResult,

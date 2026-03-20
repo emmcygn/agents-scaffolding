@@ -1,4 +1,4 @@
-.PHONY: help install install-all lint format typecheck test test-fast benchmark benchmark-structural dashboard clean ci
+.PHONY: help install install-all lint format typecheck test test-fast benchmark benchmark-structural report dashboard clean ci
 
 PYTHON ?= python
 SRC = src/scaffolder
@@ -36,6 +36,9 @@ benchmark:  ## Run the full benchmark suite
 
 benchmark-structural:  ## Run structural metrics only (no embedding)
 	$(PYTHON) -m scaffolder benchmark --no-embed
+
+report:  ## Generate HTML report from benchmark results
+	$(PYTHON) -m scaffolder report
 
 dashboard:  ## Launch Streamlit dashboard
 	$(PYTHON) -m streamlit run $(SRC)/dashboard/app.py

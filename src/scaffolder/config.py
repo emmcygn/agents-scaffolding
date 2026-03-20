@@ -17,9 +17,10 @@ class ConfigError(Exception):
 VALID_STRATEGIES = frozenset(
     {
         "lexichunk",
-        "langchain_rcts",
+        "lexichunk_contextual",
+        "rcts",
         "sentence_split",
-        "fixed_512",
+        "fixed_size",
     }
 )
 
@@ -46,7 +47,7 @@ class BenchmarkConfig:
 
     # Chunking strategies to compare
     strategies: list[str] = field(
-        default_factory=lambda: ["lexichunk", "langchain_rcts", "sentence_split", "fixed_512"]
+        default_factory=lambda: ["lexichunk", "rcts", "sentence_split", "fixed_size"]
     )
 
     # Embedding models to use
@@ -164,7 +165,7 @@ class BenchmarkConfig:
         """Create config with environment variable overrides.
 
         Environment variables use the prefix SCAFFOLDER_ and uppercase field names:
-        - SCAFFOLDER_STRATEGIES=lexichunk,langchain_rcts
+        - SCAFFOLDER_STRATEGIES=lexichunk,rcts
         - SCAFFOLDER_EMBEDDING_MODELS=all-MiniLM-L6-v2,bge-base-en-v1.5
         - SCAFFOLDER_ENABLE_VOYAGE=true
         - SCAFFOLDER_TOP_K=5

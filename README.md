@@ -133,7 +133,7 @@ cp scaffolder.yaml.example scaffolder.yaml
 Key settings:
 
 ```yaml
-strategies: [lexichunk, langchain_rcts, sentence_split, fixed_512]
+strategies: [lexichunk, rcts, sentence_split, fixed_size]
 embedding_models: [all-MiniLM-L6-v2]
 k_values: [1, 3, 5, 10]
 top_k: 10
@@ -143,7 +143,7 @@ significance_level: 0.05
 Environment variable overrides use `SCAFFOLDER_` prefix:
 
 ```bash
-export SCAFFOLDER_STRATEGIES="lexichunk,fixed_512"
+export SCAFFOLDER_STRATEGIES="lexichunk,fixed_size"
 export SCAFFOLDER_TOP_K=20
 ```
 

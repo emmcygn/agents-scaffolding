@@ -7,9 +7,11 @@ import datetime
 import logging
 import os
 import random
+import sys
 from pathlib import Path
 
 import numpy as np
+from rich.console import Console
 
 from scaffolder.chunking import ChunkingPipeline, get_all_strategies
 from scaffolder.fixtures import FixtureManager
@@ -21,6 +23,13 @@ from scaffolder.reporting.json_export import export_json
 logger = logging.getLogger(__name__)
 
 SEED = 42
+
+
+def _make_console() -> Console:
+    """Create a Rich Console that works on Windows (UTF-8 safe)."""
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    return Console(force_terminal=True)
 
 
 def _pin_seeds(seed: int = SEED) -> None:
@@ -106,10 +115,7 @@ def run_structural_benchmark(args: argparse.Namespace) -> None:
             sm = compute_structural_metrics(cs, doc)
             result.structural_metrics.append(sm)
 
-    # Print CLI report (force_terminal avoids encoding issues on Windows)
-    from rich.console import Console
-
-    console = Console(force_terminal=True)
+    console = _make_console()
     render_benchmark(result, console=console)
 
     # Export JSON if requested
@@ -195,10 +201,7 @@ def run_retrieval_benchmark(args: argparse.Namespace) -> None:
     # Phase 6: Statistical significance
     result.significance_results = list(compute_all_significance(result.retrieval_metrics))
 
-    # Output
-    from rich.console import Console
-
-    console = Console(force_terminal=True)
+    console = _make_console()
     render_benchmark(result, console=console)
 
     if args.json:
