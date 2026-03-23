@@ -1,13 +1,13 @@
-# Agent A — Day 01: {{TITLE}}
+# Agent A — Task 01: {{TITLE}}
 
 ## Mission
-{{One sentence describing what this day accomplishes and why it matters.}}
+{{One sentence describing what this task accomplishes and why it matters.}}
 
 ## Context
-{{How this day fits into the project timeline. What exists already? What doesn't exist yet? Is this a pairing day? What is the other agent working on today?}}
+{{How this task fits into the project timeline. What exists already? What doesn't exist yet? Is this a pairing day? What is the other agent working on today?}}
 
 ## Prerequisites
-- {{What must exist before this day can start}}
+- {{What must exist before this task can start}}
 - {{Tools, libraries, or files that must be installed/present}}
 - {{Dependencies from the other agent (reference their day number)}}
 
@@ -57,6 +57,6 @@ Key design decisions:
 4. {{Any integration check with the other agent's code}}
 
 ## Handoff Notes
-- **To Agent B:** {{What Agent B needs to know about today's output — import paths, interface contracts, breaking changes}}
-- **To Day 02:** {{What the next day plan should expect to exist — files, interfaces, test fixtures}}
-- **Decision:** {{Any architectural decisions made today that affect future days}}
+- **To Agent B:** {{What Agent B needs to know about this task's output — import paths, interface contracts, breaking changes}}
+- **To Task 02:** {{What the next task plan should expect to exist — files, interfaces, test fixtures}}
+- **Decision:** {{Any architectural decisions made here that affect future tasks}}

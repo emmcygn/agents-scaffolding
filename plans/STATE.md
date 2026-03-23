@@ -3,27 +3,21 @@
 Both agents read and write this file. It is the single source of truth for progress.
 
 **Rules:**
-- Update YOUR section after completing each day
-- Check the OTHER agent's section before starting a new day (for dependency resolution)
-- On pairing days: check that the other agent is ready before proceeding
-- If blocked, write the blocker here — the other agent checks this file at day boundaries
+- Update YOUR section after completing each task
+- Check the OTHER agent's section before starting a new task (for dependency resolution)
+- On pairing tasks: check that the other agent is ready before proceeding
+- If blocked, write the blocker here — the other agent checks this file at task boundaries
+- Add rows as tasks are planned — there is no fixed number
 
 ---
 
 ## Agent A — {{AGENT_A_ROLE}}
 
-| Day | Status | Completed | Notes |
-|-----|--------|-----------|-------|
-| 01  | not_started | | {{DAY_01_TITLE}} |
-| 02  | not_started | | |
-| 03  | not_started | | |
-| 04  | not_started | | |
-| 05  | not_started | | |
-| 06  | not_started | | |
-| 07  | not_started | | |
-| 08  | not_started | | |
-| 09  | not_started | | |
-| 10  | not_started | | |
+| Task | Status | Completed | Depends On | Notes |
+|------|--------|-----------|------------|-------|
+| 01   | not_started | | — | {{TASK_TITLE}} |
+
+<!-- Add rows as your plan grows. No fixed count — use as many as the project needs. -->
 
 ### Current Blockers
 _(none)_
@@ -32,18 +26,11 @@ _(none)_
 
 ## Agent B — {{AGENT_B_ROLE}}
 
-| Day | Status | Completed | Notes |
-|-----|--------|-----------|-------|
-| 01  | not_started | | {{DAY_01_TITLE}} |
-| 02  | not_started | | |
-| 03  | not_started | | |
-| 04  | not_started | | |
-| 05  | not_started | | |
-| 06  | not_started | | |
-| 07  | not_started | | |
-| 08  | not_started | | |
-| 09  | not_started | | |
-| 10  | not_started | | |
+| Task | Status | Completed | Depends On | Notes |
+|------|--------|-----------|------------|-------|
+| 01   | not_started | | — | {{TASK_TITLE}} |
+
+<!-- Add rows as your plan grows. No fixed count — use as many as the project needs. -->
 
 ### Current Blockers
 _(none)_
@@ -54,5 +41,5 @@ _(none)_
 
 Track key files that both agents depend on. When these change, note it here.
 
-| File | Last Modified By | Day | What Changed |
-|------|-----------------|-----|--------------|
+| File | Last Modified By | Task | What Changed |
+|------|-----------------|------|--------------|

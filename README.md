@@ -6,12 +6,12 @@ A reusable framework for coordinating two AI agents (Claude Code sessions) worki
 
 This repo contains the **coordination protocol** — not application code. It provides:
 
-- **ORCHESTRATOR.md** — The execution loop each agent follows every day
+- **ORCHESTRATOR.md** — The execution loop each agent follows per task
 - **BOOTSTRAP.md** — Pre-flight checklist (environment, permissions, shared contracts)
 - **STATE.md** — Single source of truth for progress (who's done what)
 - **HANDOFF.md** — Append-only log of deliverables between agents (with provenance)
 - **ISSUES.md** — Cross-agent bug tracker with severity levels
-- **Day plan templates** — Self-contained daily work orders with checklists, specs, and acceptance criteria
+- **Task plan templates** — Self-contained self-contained work orders with checklists, specs, and acceptance criteria
 - **CLAUDE.md** — Instructions that Claude Code loads automatically, embedding the orchestration protocol
 - **TROUBLESHOOTING.md** — Battle-tested failure modes and fixes
 - **Lessons log** — Shared corrections that persist across sessions
@@ -23,7 +23,7 @@ Splitting work across two agents enables:
 1. **Parallelism** — Agent A builds the core pipeline while Agent B builds UI/config/deployment simultaneously
 2. **Clear ownership** — Each agent owns specific files, reducing merge conflicts to near-zero
 3. **Focused context** — Each agent's context window stays clean and relevant to its domain
-4. **Cross-validation** — Agents test each other's modules at day boundaries, catching integration issues early
+4. **Cross-validation** — Agents test each other's modules at task boundaries, catching integration issues early
 
 This maps to the **scatter-gather** pattern from distributed systems: tasks fan out to parallel agents, results consolidate through shared artifacts. Research from Anthropic, Microsoft, and academic literature confirms file-based coordination is well-suited for 2-5 agent systems where simplicity and durability matter more than latency.
 
@@ -66,13 +66,13 @@ Replace each `{{PLACEHOLDER}}` with your project-specific values:
 | `{{VERSION_CHECK_COMMAND}}` | BOOTSTRAP | `python --version` |
 | Dependency placeholders | ORCHESTRATOR | Fill in the cross-agent dependency tables |
 
-### 3. Write your day plans
+### 3. Write your task plans
 
-Create `plans/agent-a/day-01.md` through `day-NN.md` for each agent. Use the templates in `plans/agent-a/day-01.md` and `plans/agent-b/day-01.md` as starting points.
+Create `plans/agent-a/task-01.md` through `task-NN.md` for each agent. Use the templates in `plans/agent-a/task-01.md` and `plans/agent-b/task-01.md` as starting points.
 
-Each day plan should be **self-contained** — an agent should be able to execute it with zero additional context beyond what's in the plan file itself.
+Each task plan should be **self-contained** — an agent should be able to execute it with zero additional context beyond what's in the plan file itself.
 
-**Day plan anatomy:**
+**Task plan anatomy:**
 ```
 Mission        -> What and why (one sentence)
 Context        -> How it fits in the timeline
@@ -84,19 +84,19 @@ Acceptance     -> Commands to verify success
 Handoff        -> What the other agent needs to know
 ```
 
-**Tips for writing effective day plans:**
+**Tips for writing effective task plans:**
 - Front-load Agent B's independent work (config, docs, UI scaffolding) so it has work to do while waiting on Agent A's pipeline
 - Include exact code signatures and data structures — vague specs cause duplicate work (Anthropic's #1 finding from their multi-agent research system)
 - Acceptance criteria should be runnable commands, not prose descriptions
 - The implementation details section is where most of the value lives — be specific
 
-### 4. Generating day plans with Claude
+### 4. Generating task plans with Claude
 
-You don't have to write all day plans manually. Use Claude Code itself:
+You don't have to write all task plans manually. Use Claude Code itself:
 
 1. **Research phase:** Have Claude explore your problem space, dependencies, and prior art
 2. **Proposal phase:** Ask Claude for an implementation proposal with module breakdown and timeline
-3. **Planning phase:** Ask Claude to write day plan files, one at a time, using the template
+3. **Planning phase:** Ask Claude to write task plan files, one at a time, using the template
 4. **Review:** Read each plan. Challenge the task breakdown and dependency ordering
 5. **Launch:** Once satisfied, start the agents
 
@@ -140,10 +140,10 @@ tail -50 plans/HANDOFF.md   # Latest handoffs
 
 Based on production experience:
 
-- Agents complete roughly **1 day per 15-30 minutes** of wall-clock time
-- In 2 hours: expect **4-8 days complete per agent** (8-16 total)
-- Agent B typically runs **2-3 days ahead** of Agent A (config/UI work is faster than pipeline/metrics)
-- Context window exhaustion happens around **10-15 days in a single session** — the recovery protocol handles this
+- Agents complete roughly **1 task per 15-30 minutes** of wall-clock time
+- In 2 hours: expect **4-8 tasks complete per agent** (8-16 total)
+- Agent B typically runs **2-3 tasks ahead** of Agent A (config/UI work is faster than core pipeline)
+- Context window exhaustion happens around **10-15 tasks in a single session** — the recovery protocol handles this
 - Budget for **1-2 pairing interventions** per full run (dependency issues, shared contract changes)
 
 ## File Structure
@@ -159,9 +159,9 @@ Based on production experience:
 │   ├── HANDOFF.md                 # Inter-agent deliverable log
 │   ├── ISSUES.md                  # Cross-agent issue queue
 │   ├── agent-a/
-│   │   └── day-01.md              # Day plan template for Agent A
+│   │   └── task-01.md              # Task plan template for Agent A
 │   └── agent-b/
-│       └── day-01.md              # Day plan template for Agent B
+│       └── task-01.md              # Task plan template for Agent B
 └── tasks/
     ├── todo.md                    # Per-session task tracking
     └── lessons.md                 # Shared corrections log
@@ -175,11 +175,11 @@ HANDOFF.md and ISSUES.md are append-only. This eliminates merge conflicts when t
 ### File-level ownership
 Each agent owns specific files. The shared contract file (e.g., `models.py`, `types.ts`) is the interface boundary — Agent A produces data in these shapes, Agent B consumes them. Changes to shared contracts require explicit coordination (pairing days).
 
-### Self-contained day plans
-Every day plan includes everything an agent needs: prerequisites, implementation details, test cases, acceptance criteria. No external context required. This enables session recovery — if context is lost, the agent reads STATE.md to find where it left off and picks up the next day plan. This aligns with Anthropic's "Effective Harnesses" guidance: progress tracking files + git commits as recovery points.
+### Self-contained task plans
+Every task plan includes everything an agent needs: prerequisites, implementation details, test cases, acceptance criteria. No external context required. This enables session recovery — if context is lost, the agent reads STATE.md to find where it left off and picks up the next task plan. This aligns with Anthropic's "Effective Harnesses" guidance: progress tracking files + git commits as recovery points.
 
 ### Validation gates
-Agents cannot mark a day complete without passing `{{VERIFY_COMMAND}}`. If verification fails, a retry protocol guides the agent through diagnosis, re-think, and escalation. This prevents premature completion — the #1 failure mode identified in Anthropic's long-running agent research.
+Agents cannot mark a task complete without passing `{{VERIFY_COMMAND}}`. If verification fails, a retry protocol guides the agent through diagnosis, re-think, and escalation. This prevents premature completion — the #1 failure mode identified in Anthropic's long-running agent research.
 
 ### Cross-validation at boundaries
 After completing a day, each agent smoke-tests modules it depends on from the other agent. Issues are filed immediately with severity levels (BLOCKER, BUG, WARN, REQUEST). This is a manual implementation of the output validation pattern recommended by Microsoft, OpenAI, and Anthropic.
@@ -189,7 +189,7 @@ HANDOFF entries include timestamps, duration, and verification results. This cre
 
 ## Proven At Scale
 
-This framework was used to build a complete evaluation harness (40 agent-days, 189+ tests, 80%+ coverage, full CLI/JSON/HTML/Streamlit outputs) with:
+This framework was used to build a complete evaluation harness (40 agent-tasks, 189+ tests, 80%+ coverage, full CLI/JSON/HTML/Streamlit outputs) with:
 - Zero merge conflicts between agents
 - 4 cross-agent issues filed and resolved autonomously
 - Full session recovery after context loss
