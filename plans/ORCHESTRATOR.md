@@ -160,16 +160,50 @@ When a day has a dependency (noted in STATE.md), the agent must:
 
 ---
 
+## Validation Gate & Retry Protocol
+
+After completing a day's checklist, the agent MUST pass the validation gate before marking the day complete.
+
+### Validation Gate
+
+```
+RUN {{VERIFY_COMMAND}}
+  │
+  ├── PASS → proceed to post-day protocol (mark complete)
+  │
+  └── FAIL → enter retry protocol
+```
+
+### Retry Protocol
+
+1. **Attempt 1:** Read the error output. Fix the root cause in YOUR code. Re-run.
+2. **Attempt 2:** If same failure, re-think the approach — the implementation may be fundamentally wrong.
+3. **Attempt 3:** If still failing, check if the failure is in the OTHER agent's code:
+   - YES → file BLOCKER in `plans/ISSUES.md`, skip to non-blocked work
+   - NO → write the problem in `plans/STATE.md` under "Current Blockers", move on
+4. **Never:** Brute-force retry the same approach. If it failed twice, the approach is wrong.
+5. **Never:** Mark a day complete if the validation gate has not passed.
+
+### Failure in Other Agent's Code
+
+If `{{VERIFY_COMMAND}}` fails due to code you don't own:
+1. File an issue in `plans/ISSUES.md` with severity `BLOCKER` or `BUG`
+2. If you can work around it without modifying their file, do so and file a `BUG`
+3. If you must modify their file as an emergency fix, do so AND log it in both `plans/ISSUES.md` and `plans/HANDOFF.md`
+
+---
+
 ## Session Recovery
 
 If a terminal crashes or context is lost:
 
 1. Start a new Claude Code session
 2. Send the identity prompt: "You are Agent {A|B}..."
-3. The agent reads `plans/ISSUES.md` → fixes any open issues assigned to it FIRST
-4. The agent reads `plans/STATE.md` → finds the last completed day → resumes from the next one
-5. The agent reads `plans/HANDOFF.md` → catches up on what the other agent has delivered
-6. The agent reads `tasks/lessons.md` → loads any corrections from prior sessions
+3. Run `plans/BOOTSTRAP.md` recovery checklist (verify environment still works)
+4. The agent reads `plans/ISSUES.md` → fixes any open issues assigned to it FIRST
+5. The agent reads `plans/STATE.md` → finds the last completed day → resumes from the next one
+6. The agent reads `plans/HANDOFF.md` → catches up on what the other agent has delivered
+7. The agent reads `tasks/lessons.md` → loads any corrections from prior sessions
 
 STATE.md is the ground truth. If it says Day 7 is completed, trust it. Don't redo work.
 

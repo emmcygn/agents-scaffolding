@@ -25,8 +25,9 @@
 
 {{Detailed specification: data structures, function signatures, algorithms, pseudocode. Be specific enough that the agent can implement without ambiguity.}}
 
-```python
-# Example code showing the exact interface or structure expected
+```
+# Example code showing the exact interface or structure expected.
+# Use your project's language here (Python, TypeScript, Go, Rust, etc.)
 ```
 
 Key decisions:

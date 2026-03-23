@@ -34,10 +34,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repo is built by **two AI agents working in parallel** with self-contained daily plans. All implementation is agent-first — Claude Code IS the engineering team.
 
 **Full orchestration protocol:** `plans/ORCHESTRATOR.md`
+**Pre-flight checklist:** `plans/BOOTSTRAP.md` (run before Day 1 and after session recovery)
 **Progress tracker:** `plans/STATE.md` (single source of truth for what's done)
 **Inter-agent comms:** `plans/HANDOFF.md` (append-only log of delivered work)
 **Cross-agent issues:** `plans/ISSUES.md` (bugs, blockers, and requests between agents)
 **Shared lessons:** `tasks/lessons.md` (corrections and patterns)
+**Troubleshooting:** `TROUBLESHOOTING.md` (battle-tested failure modes and fixes)
 
 ### Execution Modes
 
